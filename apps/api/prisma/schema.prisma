@@ -1,0 +1,282 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum SourceType {
+  LOCAL_FILE        @map("local_file")
+  NETWORK_URL       @map("network_url")
+  EXTERNAL_EMBED    @map("external_embed")
+  OFFICIAL_LICENSED @map("official_licensed")
+  PUBLIC_DOMAIN     @map("public_domain")
+  CREATIVE_COMMONS  @map("creative_commons")
+}
+
+enum ProjectStatus {
+  ACTIVE   @map("active")
+  ARCHIVED @map("archived")
+}
+
+enum SentenceProgressStatus {
+  VIEWED   @map("viewed")
+  LEARNING @map("learning")
+  MASTERED @map("mastered")
+}
+
+enum VocabularyMasteryStatus {
+  NEW      @map("new")
+  LEARNING @map("learning")
+  MASTERED @map("mastered")
+}
+
+enum StudyItemType {
+  WORD      @map("word")
+  PHRASE    @map("phrase")
+  SENTENCE  @map("sentence")
+  PARAGRAPH @map("paragraph")
+  MIXED     @map("mixed")
+}
+
+enum StudySourceType {
+  MANUAL_INPUT    @map("manual_input")
+  VIDEO_SUBTITLE  @map("video_subtitle")
+  EXTERNAL_MANUAL @map("external_manual")
+}
+
+enum StudyItemMasteryStatus {
+  NEW      @map("new")
+  LEARNING @map("learning")
+  MASTERED @map("mastered")
+}
+
+model User {
+  id               String                 @id @default(uuid()) @db.VarChar(36)
+  email            String                 @unique @db.VarChar(255)
+  passwordHash     String                 @map("password_hash") @db.VarChar(255)
+  nickname         String?                @db.VarChar(100)
+  projects         LearningProject[]
+  sentenceProgress UserSentenceProgress[]
+  vocabularyItems  VocabularyItem[]
+  aiUsageLogs      AiUsageLog[]
+  studyItems       StudyItem[]
+  userNotes        UserNote[]
+  createdAt        DateTime               @default(now()) @map("created_at")
+  updatedAt        DateTime               @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model LearningProject {
+  id               String                 @id @default(uuid()) @db.VarChar(36)
+  userId           String                 @map("user_id") @db.VarChar(36)
+  user             User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title            String                 @db.VarChar(255)
+  language         String                 @db.VarChar(20)
+  sourceType       SourceType             @map("source_type")
+  sourceUrl        String?                @map("source_url") @db.Text
+  videoFileName    String?                @map("video_file_name") @db.VarChar(255)
+  subtitleFileName String?                @map("subtitle_file_name") @db.VarChar(255)
+  duration         Float?
+  lastPosition     Float                  @default(0) @map("last_position")
+  status           ProjectStatus          @default(ACTIVE)
+  subtitleLines    SubtitleLine[]
+  sentenceAnalyses SentenceAnalysis[]
+  sentenceProgress UserSentenceProgress[]
+  vocabularyItems  VocabularyItem[]
+  aiUsageLogs      AiUsageLog[]
+  studyItems       StudyItem[]
+  userNotes        UserNote[]
+  createdAt        DateTime               @default(now()) @map("created_at")
+  updatedAt        DateTime               @updatedAt @map("updated_at")
+
+  @@index([userId, status])
+  @@map("learning_projects")
+}
+
+model SubtitleLine {
+  id               String                 @id @default(uuid()) @db.VarChar(36)
+  projectId        String                 @map("project_id") @db.VarChar(36)
+  project          LearningProject        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  lineIndex        Int                    @map("line_index")
+  startTime        Float                  @map("start_time")
+  endTime          Float                  @map("end_time")
+  textOriginal     String                 @map("text_original") @db.Text
+  textTranslation  String?                @map("text_translation") @db.Text
+  sentenceAnalyses SentenceAnalysis[]
+  sentenceProgress UserSentenceProgress[]
+  vocabularyItems  VocabularyItem[]
+  studyItems       StudyItem[]
+  userNotes        UserNote[]
+  createdAt        DateTime               @default(now()) @map("created_at")
+
+  @@unique([projectId, lineIndex])
+  @@index([projectId, startTime, endTime])
+  @@map("subtitle_lines")
+}
+
+model SentenceAnalysis {
+  id             String          @id @default(uuid()) @db.VarChar(36)
+  projectId      String          @map("project_id") @db.VarChar(36)
+  project        LearningProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  subtitleLineId String?         @map("subtitle_line_id") @db.VarChar(36)
+  subtitleLine   SubtitleLine?   @relation(fields: [subtitleLineId], references: [id], onDelete: SetNull)
+  language       String          @db.VarChar(20)
+  textHash       String          @map("text_hash") @db.VarChar(128)
+  analysisJson   Json            @map("analysis_json")
+  modelName      String?         @map("model_name") @db.VarChar(100)
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+
+  @@unique([projectId, subtitleLineId, language])
+  @@index([projectId, textHash, language])
+  @@map("sentence_analysis")
+}
+
+model UserSentenceProgress {
+  id             String                 @id @default(uuid()) @db.VarChar(36)
+  userId         String                 @map("user_id") @db.VarChar(36)
+  user           User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId      String                 @map("project_id") @db.VarChar(36)
+  project        LearningProject        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  subtitleLineId String?                @map("subtitle_line_id") @db.VarChar(36)
+  subtitleLine   SubtitleLine?          @relation(fields: [subtitleLineId], references: [id], onDelete: SetNull)
+  manualText     String?                @map("manual_text") @db.Text
+  status         SentenceProgressStatus @default(VIEWED)
+  listenCount    Int                    @default(0) @map("listen_count")
+  isFavorite     Boolean                @default(false) @map("is_favorite")
+  note           String?                @db.Text
+  lastViewedAt   DateTime?              @map("last_viewed_at")
+  createdAt      DateTime               @default(now()) @map("created_at")
+  updatedAt      DateTime               @updatedAt @map("updated_at")
+
+  @@unique([userId, projectId, subtitleLineId])
+  @@index([userId, isFavorite])
+  @@map("user_sentence_progress")
+}
+
+model VocabularyItem {
+  id             String                  @id @default(uuid()) @db.VarChar(36)
+  userId         String                  @map("user_id") @db.VarChar(36)
+  user           User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId      String?                 @map("project_id") @db.VarChar(36)
+  project        LearningProject?        @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  subtitleLineId String?                 @map("subtitle_line_id") @db.VarChar(36)
+  subtitleLine   SubtitleLine?           @relation(fields: [subtitleLineId], references: [id], onDelete: SetNull)
+  studyItemId    String?                 @map("study_item_id") @db.VarChar(36)
+  studyItem      StudyItem?              @relation(fields: [studyItemId], references: [id], onDelete: SetNull)
+  word           String                  @db.VarChar(255)
+  meaning        String?                 @db.Text
+  language       String                  @db.VarChar(20)
+  sourceText     String?                 @map("source_text") @db.Text
+  sourceType     StudySourceType?        @map("source_type")
+  note           String?                 @db.Text
+  masteryStatus  VocabularyMasteryStatus @default(NEW) @map("mastery_status")
+  createdAt      DateTime                @default(now()) @map("created_at")
+  updatedAt      DateTime                @updatedAt @map("updated_at")
+
+  @@index([userId, language, masteryStatus])
+  @@index([userId, sourceType])
+  @@index([projectId])
+  @@index([studyItemId])
+  @@map("vocabulary_items")
+}
+
+model AiUsageLog {
+  id            String           @id @default(uuid()) @db.VarChar(36)
+  userId        String           @map("user_id") @db.VarChar(36)
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId     String?          @map("project_id") @db.VarChar(36)
+  project       LearningProject? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  studyItemId   String?          @map("study_item_id") @db.VarChar(36)
+  studyItem     StudyItem?       @relation(fields: [studyItemId], references: [id], onDelete: SetNull)
+  actionType    String           @map("action_type") @db.VarChar(100)
+  sourceType    StudySourceType? @map("source_type")
+  inputHash     String?          @map("input_hash") @db.VarChar(128)
+  modelName     String?          @map("model_name") @db.VarChar(100)
+  inputTokens   Int?             @map("input_tokens")
+  outputTokens  Int?             @map("output_tokens")
+  totalTokens   Int?             @map("total_tokens")
+  costEstimated Decimal?         @map("cost_estimated") @db.Decimal(10, 6)
+  createdAt     DateTime         @default(now()) @map("created_at")
+
+  @@index([userId, createdAt])
+  @@index([projectId])
+  @@index([studyItemId])
+  @@index([inputHash])
+  @@map("ai_usage_logs")
+}
+
+model StudyItem {
+  id                 String                 @id @default(uuid()) @db.VarChar(36)
+  userId             String                 @map("user_id") @db.VarChar(36)
+  user               User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId          String?                @map("project_id") @db.VarChar(36)
+  project            LearningProject?       @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  subtitleLineId     String?                @map("subtitle_line_id") @db.VarChar(36)
+  subtitleLine       SubtitleLine?          @relation(fields: [subtitleLineId], references: [id], onDelete: SetNull)
+  itemType           StudyItemType          @map("item_type")
+  sourceType         StudySourceType        @default(MANUAL_INPUT) @map("source_type")
+  language           String                 @db.VarChar(20)
+  textOriginal       String                 @map("text_original") @db.Text
+  normalizedText     String                 @map("normalized_text") @db.Text
+  normalizedTextHash String                 @map("normalized_text_hash") @db.VarChar(128)
+  sourceNote         String?                @map("source_note") @db.VarChar(255)
+  tags               Json?
+  isFavorite         Boolean                @default(false) @map("is_favorite")
+  masteryStatus      StudyItemMasteryStatus @default(NEW) @map("mastery_status")
+  reviewCount        Int                    @default(0) @map("review_count")
+  lastViewedAt       DateTime?              @map("last_viewed_at")
+  analysis           StudyItemAnalysis?
+  vocabularyItems    VocabularyItem[]
+  notes              UserNote[]
+  aiUsageLogs        AiUsageLog[]
+  createdAt          DateTime               @default(now()) @map("created_at")
+  updatedAt          DateTime               @updatedAt @map("updated_at")
+
+  @@unique([userId, normalizedTextHash, language])
+  @@index([userId, itemType])
+  @@index([userId, sourceType])
+  @@index([userId, isFavorite])
+  @@index([userId, updatedAt])
+  @@index([projectId])
+  @@index([subtitleLineId])
+  @@map("study_items")
+}
+
+model StudyItemAnalysis {
+  id           String    @id @default(uuid()) @db.VarChar(36)
+  studyItemId  String    @unique @map("study_item_id") @db.VarChar(36)
+  studyItem    StudyItem @relation(fields: [studyItemId], references: [id], onDelete: Cascade)
+  language     String    @db.VarChar(20)
+  analysisJson Json      @map("analysis_json")
+  modelName    String?   @map("model_name") @db.VarChar(100)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@map("study_item_analysis")
+}
+
+model UserNote {
+  id             String           @id @default(uuid()) @db.VarChar(36)
+  userId         String           @map("user_id") @db.VarChar(36)
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studyItemId    String?          @map("study_item_id") @db.VarChar(36)
+  studyItem      StudyItem?       @relation(fields: [studyItemId], references: [id], onDelete: Cascade)
+  projectId      String?          @map("project_id") @db.VarChar(36)
+  project        LearningProject? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  subtitleLineId String?          @map("subtitle_line_id") @db.VarChar(36)
+  subtitleLine   SubtitleLine?    @relation(fields: [subtitleLineId], references: [id], onDelete: SetNull)
+  noteText       String           @map("note_text") @db.Text
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
+
+  @@index([userId, updatedAt])
+  @@index([studyItemId])
+  @@index([projectId])
+  @@index([subtitleLineId])
+  @@map("user_notes")
+}

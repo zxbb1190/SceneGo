@@ -1,0 +1,28 @@
+{
+  "name": "scenego",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "pnpm -r build",
+    "dev": "pnpm -r --parallel dev",
+    "start:api": "node apps/api/dist/index.js",
+    "preview:web": "pnpm --filter @scenego/web preview",
+    "test": "pnpm -r test",
+    "docker:mysql:up": "docker compose up -d mysql",
+    "docker:mysql:down": "docker compose down",
+    "db:generate": "node apps/api/node_modules/prisma/build/index.js generate --schema apps/api/prisma/schema.prisma",
+    "db:migrate": "node apps/api/node_modules/prisma/build/index.js migrate dev --schema apps/api/prisma/schema.prisma",
+    "db:deploy": "node apps/api/node_modules/prisma/build/index.js migrate deploy --schema apps/api/prisma/schema.prisma",
+    "db:push": "node apps/api/node_modules/prisma/build/index.js db push --schema apps/api/prisma/schema.prisma",
+    "db:studio": "node apps/api/node_modules/prisma/build/index.js studio --schema apps/api/prisma/schema.prisma",
+    "smoke:api": "pnpm db:deploy && node scripts/api-smoke.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}

@@ -1,0 +1,14 @@
+node_modules/
+dist/
+build/
+.turbo/
+.vite/
+.env
+.env.*
+!.env.example
+coverage/
+*.log
+
+# Local planning / agent context, not part of the open-source package
+docs/
+AGENTS.md
