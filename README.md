@@ -1,62 +1,62 @@
 # SceneGo
 
-[中文文档](README.zh-CN.md)
+[English](README.en.md)
 
-SceneGo is an AI-assisted language learning workspace for user-provided learning scenes.
+SceneGo 是一个面向用户自有学习材料的 AI 场景化语言学习工作台。
 
-It is not a video content platform. SceneGo helps learners study from local videos, user-provided subtitles, external companion links, and manually entered text. It provides playback, subtitle sync, structured AI sentence/text analysis, learning history, sentence favorites, notes, and vocabulary review.
+它不是视频内容平台。SceneGo 支持本地视频、用户自备字幕、外链手动伴学和手动输入文本，提供播放器、字幕同步、结构化 AI 句子/文本分析、学习历史、句子收藏、笔记和生词本能力。
 
-## What It Does
+## 功能
 
-- Local video learning with user-selected video files and user-provided SRT/VTT subtitles
-- Subtitle parsing and current-sentence matching on a deterministic timeline
-- Native video playback, previous/next sentence navigation, and replay current sentence
-- AI sentence analysis for subtitle lines and manual companion text
-- Text learning for words, phrases, sentences, paragraphs, and mixed snippets
-- Learning history with filters, detail pages, notes, favorites, and deletion
-- Sentence book that includes both video/subtitle favorites and text-study sentence favorites
-- Vocabulary book with source context, mastery status, and deletion
-- External-link companion mode using iframe/open-in-new-tab plus manual sentence input
-- OpenAI-compatible AI provider adapter with structured JSON validation and caching
+- 本地视频学习：用户选择本地视频文件，并上传或粘贴自备 SRT/VTT 字幕
+- 字幕解析：按时间轴解析字幕，并确定当前播放句子
+- 原生视频播放：上一句、下一句、重播当前句、暂停后显示当前句
+- AI 句子分析：分析字幕句和外链手动输入句
+- 文本学习：支持单词、短语、句子、段落和混合文本
+- 学习历史：支持筛选、详情页、笔记、收藏和删除
+- 句子本：同时展示视频/字幕收藏句和文本学习收藏句
+- 生词本：展示来源上下文、掌握状态，并支持删除
+- 外链伴学：iframe 或外部打开，加手动输入句子分析
+- OpenAI-compatible AI Provider：结构化 JSON 校验和结果缓存
 
-## Product Boundaries
+## 产品边界
 
-SceneGo intentionally does not provide or fetch copyrighted content.
+SceneGo 不提供、下载或抓取版权内容。
 
-- No third-party video downloading
-- No scraping of Bilibili, iQiyi, YouTube, Netflix, or any external platform
-- No DRM, login, ads, membership, hotlink, or iframe restriction bypass
-- No reading cross-origin iframe DOM or media state
-- No full subtitle export or full transcript download
-- External links are embed/manual companion mode only
-- User-imported content remains private learning data
+- 不实现第三方视频下载
+- 不抓取 Bilibili、iQiyi、YouTube、Netflix 或任何外部平台
+- 不绕过 DRM、登录、广告、会员、防盗链或 iframe 限制
+- 不读取跨域 iframe 的 DOM 或媒体状态
+- 不提供完整字幕导出或完整 transcript 下载
+- 外链模式只做嵌入/外部打开和手动伴学
+- 用户导入的内容属于私有学习数据
 
-## Tech Stack
+## 技术栈
 
-- Frontend: React, Vite, TypeScript, TailwindCSS, Zustand, TanStack Query
-- Backend: Node.js, Express, TypeScript
-- Database: MySQL, Prisma
-- Package manager: pnpm
-- AI: OpenAI-compatible Chat Completions adapter
-- Player: native `video`; Video.js/hls.js can be added later if needed
+- 前端：React、Vite、TypeScript、TailwindCSS、Zustand、TanStack Query
+- 后端：Node.js、Express、TypeScript
+- 数据库：MySQL、Prisma
+- 包管理：pnpm
+- AI：OpenAI-compatible Chat Completions 适配器
+- 播放器：原生 `video`，后续可按需接入 Video.js/hls.js
 
-## Repository Layout
+## 目录结构
 
 ```text
-apps/web              React frontend
-apps/api              Express API and Prisma schema
-packages/shared       Shared domain and AI JSON types
-packages/subtitles    Subtitle parser and timeline matcher
-scripts               Local smoke-test helpers
+apps/web              React 前端
+apps/api              Express API 和 Prisma schema
+packages/shared       前后端共享领域类型与 AI JSON 类型
+packages/subtitles    字幕解析与时间轴匹配
+scripts               本地 smoke test 辅助脚本
 ```
 
-## Quick Start
+## 快速开始
 
-Requirements:
+环境要求：
 
 - Node.js 20+
 - pnpm 9+
-- MySQL 8.x, or Docker Desktop for the included MySQL service
+- MySQL 8.x，或安装 Docker Desktop 使用内置 MySQL 服务
 
 ```bash
 pnpm install
@@ -67,15 +67,15 @@ pnpm db:migrate
 pnpm dev
 ```
 
-By default:
+默认地址：
 
-- Web: `http://localhost:5173`
-- API: `http://localhost:4000`
-- If `5173` is already in use, Vite automatically uses the next free port.
+- 前端：`http://localhost:5173`
+- 后端：`http://localhost:4000`
+- 如果 `5173` 已被占用，Vite 会自动使用下一个可用端口。
 
-## Environment Variables
+## 环境变量
 
-Create `.env` from `.env.example`.
+从 `.env.example` 创建 `.env`：
 
 ```bash
 PORT=4000
@@ -93,13 +93,13 @@ AI_MAX_TOKENS=
 AI_REQUEST_TIMEOUT_MS=
 ```
 
-Never commit `.env` or API keys.
+不要把 `.env` 或任何 API Key 提交到仓库。
 
-## AI Provider Setup
+## AI 配置
 
-SceneGo is provider-neutral. The backend calls an OpenAI-compatible `/chat/completions` endpoint and validates the returned structured JSON before saving it.
+SceneGo 不绑定任何固定厂商。后端调用 OpenAI-compatible 的 `/chat/completions` 接口，并在保存前校验 AI 返回的结构化 JSON。
 
-Required AI variables:
+必填配置：
 
 ```bash
 OPENAI_COMPATIBLE_BASE_URL=https://api.example.com/v1
@@ -107,7 +107,7 @@ OPENAI_COMPATIBLE_API_KEY=your-api-key
 AI_MODEL=provider/model-name
 ```
 
-Optional AI variables:
+可选配置：
 
 ```bash
 AI_MAX_TOKENS=4096
@@ -116,21 +116,21 @@ AI_RESPONSE_FORMAT=json_object
 AI_ENABLE_THINKING=false
 ```
 
-Compatibility notes:
+兼容说明：
 
-- `OPENAI_COMPATIBLE_BASE_URL` should be the API root ending in `/v1`.
-- `AI_RESPONSE_FORMAT=json_object` sends `response_format: { "type": "json_object" }`. Leave it empty if your provider does not support this field.
-- `AI_ENABLE_THINKING=false` sends the provider extension `enable_thinking: false`. Leave it empty unless your provider supports that option.
-- The app still prompts for JSON and validates JSON even when `AI_RESPONSE_FORMAT` is not enabled.
-- If the provider returns malformed or truncated JSON, the API returns `502 AI_PROVIDER_INVALID_RESPONSE` instead of a generic 500.
+- `OPENAI_COMPATIBLE_BASE_URL` 应该是以 `/v1` 结尾的 API 根地址。
+- `AI_RESPONSE_FORMAT=json_object` 会发送 `response_format: { "type": "json_object" }`。如果你的 provider 不支持这个字段，请留空。
+- `AI_ENABLE_THINKING=false` 会发送厂商扩展参数 `enable_thinking: false`。只有 provider 支持时才建议配置。
+- 即使不启用 `AI_RESPONSE_FORMAT`，SceneGo 仍会通过 prompt 要求 JSON，并在服务端严格校验。
+- 如果 provider 返回了截断或非法 JSON，API 会返回 `502 AI_PROVIDER_INVALID_RESPONSE`，不会伪装成通用 500。
 
-Recommended provider: SiliconFlow.
+推荐使用硅基流动。
 
-SiliconFlow supports many OpenAI-compatible models, including DeepSeek-family and Qwen-family models. You can register through this referral link:
+硅基流动提供大量 OpenAI-compatible 模型，包括 DeepSeek 系列和 Qwen 系列。可以通过这个推广链接注册：
 
 https://cloud.siliconflow.cn/i/iA6DF2nP
 
-Example SiliconFlow configuration:
+硅基流动示例配置：
 
 ```bash
 OPENAI_COMPATIBLE_BASE_URL=https://api.siliconflow.cn/v1
@@ -141,15 +141,15 @@ AI_REQUEST_TIMEOUT_MS=60000
 AI_ENABLE_THINKING=false
 ```
 
-If you use a model/provider that supports OpenAI JSON mode, you may also add:
+如果模型或 provider 支持 OpenAI JSON mode，也可以加上：
 
 ```bash
 AI_RESPONSE_FORMAT=json_object
 ```
 
-## Database
+## 数据库
 
-The default Docker service creates:
+默认 Docker MySQL 服务会创建：
 
 ```text
 database: scenego
@@ -158,7 +158,7 @@ password: password
 port: 3306
 ```
 
-Start MySQL and run migrations:
+启动 MySQL 并执行迁移：
 
 ```bash
 pnpm docker:mysql:up
@@ -166,57 +166,57 @@ pnpm db:generate
 pnpm db:migrate
 ```
 
-For production, use a managed MySQL 8.x instance or your own MySQL server, then set:
+生产环境建议使用托管 MySQL 8.x 或自建 MySQL，然后配置：
 
 ```bash
 DATABASE_URL="mysql://USER:PASSWORD@HOST:3306/DATABASE"
 ```
 
-Apply migrations in deployment:
+部署时执行迁移：
 
 ```bash
 pnpm db:deploy
 ```
 
-## Development
+## 开发
 
-Run all packages:
+运行所有包：
 
 ```bash
 pnpm dev
 ```
 
-Run only the API:
+只运行后端：
 
 ```bash
 pnpm --filter @scenego/api dev
 ```
 
-Run only the web app:
+只运行前端：
 
 ```bash
 pnpm --filter @scenego/web dev
 ```
 
-Build everything:
+构建所有包：
 
 ```bash
 pnpm build
 ```
 
-Run tests:
+运行测试：
 
 ```bash
 pnpm test
 ```
 
-## Deployment
+## 部署
 
-One simple production deployment shape:
+一种简单的生产部署方式：
 
-1. Provision MySQL 8.x.
-2. Set API environment variables on your server.
-3. Install dependencies and build:
+1. 准备 MySQL 8.x。
+2. 在服务器或部署平台配置 API 环境变量。
+3. 安装依赖并构建：
 
 ```bash
 pnpm install --frozen-lockfile
@@ -224,26 +224,26 @@ pnpm db:deploy
 pnpm build
 ```
 
-4. Start the API:
+4. 启动 API：
 
 ```bash
 pnpm start:api
 ```
 
-5. Serve `apps/web/dist` with Nginx, Caddy, Vercel, Netlify, or another static host.
-6. Proxy `/api/*` from the web host to the API service, or set `VITE_API_BASE_URL` before building the web app:
+5. 使用 Nginx、Caddy、Vercel、Netlify 或其他静态托管服务部署 `apps/web/dist`。
+6. 将 Web 域名下的 `/api/*` 代理到 API 服务；或者在构建前设置 `VITE_API_BASE_URL`：
 
 ```bash
 VITE_API_BASE_URL=https://api.your-domain.com pnpm --filter @scenego/web build
 ```
 
-Local preview for the built web app:
+本地预览构建后的前端：
 
 ```bash
 pnpm preview:web
 ```
 
-## Main API Routes
+## 主要 API
 
 ```text
 POST   /api/v1/auth/register
@@ -282,17 +282,17 @@ DELETE /api/v1/vocabulary/:itemId
 
 ## Smoke Test
 
-The API smoke test starts a temporary API process and a fake OpenAI-compatible service. It covers auth, project CRUD, subtitle parsing, progress, favorites, vocabulary, and AI analysis caching.
+API smoke test 会启动临时 API 进程和假的 OpenAI-compatible 服务，覆盖注册、登录、JWT 鉴权、项目、字幕解析、进度、收藏、生词和 AI 分析缓存。
 
 ```bash
 DATABASE_URL="mysql://scenego:password@localhost:3306/scenego" pnpm smoke:api
 ```
 
-Use `GET /health/db` to check whether the API can reach MySQL. If the database is unavailable, the API returns `503 DATABASE_UNAVAILABLE`.
+可以用 `GET /health/db` 检查 API 是否能连接 MySQL。数据库不可用时，API 会返回 `503 DATABASE_UNAVAILABLE`。
 
-## Open Source Notes
+## 开源注意事项
 
-- `.env`, API keys, local logs, `docs/`, and `AGENTS.md` are ignored by git.
-- Add a `LICENSE` file before publishing publicly.
-- Review the README and screenshots before creating the GitHub repository.
-- Keep provider keys in GitHub Actions secrets or deployment platform secrets.
+- `.env`、API Key、本地日志、`docs/` 和 `AGENTS.md` 已被 git 忽略。
+- 公开发布前建议添加 `LICENSE` 文件，例如 MIT。
+- 创建 GitHub 仓库前建议补充截图、演示 GIF 或在线 Demo 地址。
+- GitHub Actions 或部署平台中请使用 Secrets 保存 provider key。
