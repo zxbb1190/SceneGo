@@ -65,7 +65,7 @@ scripts               Local smoke-test helpers
 No public demo is provided yet. Start the app locally and open the main text-study entry:
 
 ```text
-http://localhost:5173/text-study
+http://localhost:5174/text-study
 ```
 
 Screenshot placeholders:
@@ -94,9 +94,9 @@ pnpm dev
 
 By default:
 
-- Web: `http://localhost:5173`
+- Web: `http://localhost:5174`
 - API: `http://localhost:4000`
-- If `5173` is already in use, Vite automatically uses the next free port.
+- If `5174` is already in use, Vite automatically uses the next free port.
 
 ## Environment Variables
 
@@ -104,7 +104,7 @@ Create `.env` from `.env.example`.
 
 ```bash
 PORT=4000
-CORS_ORIGIN=http://localhost:5173,http://localhost:5174
+CORS_ORIGIN=http://localhost:5174
 JWT_SECRET=replace-with-a-long-random-secret
 
 DATABASE_URL="mysql://scenego:password@localhost:3306/scenego"

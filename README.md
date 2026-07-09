@@ -65,7 +65,7 @@ scripts               本地 smoke test 辅助脚本
 当前仓库暂未提供在线 Demo。你可以按“快速开始”在本地启动后访问文本学习主入口：
 
 ```text
-http://localhost:5173/text-study
+http://localhost:5174/text-study
 ```
 
 截图占位：
@@ -94,9 +94,9 @@ pnpm dev
 
 默认地址：
 
-- 前端：`http://localhost:5173`
+- 前端：`http://localhost:5174`
 - 后端：`http://localhost:4000`
-- 如果 `5173` 已被占用，Vite 会自动使用下一个可用端口。
+- 如果 `5174` 已被占用，Vite 会自动使用下一个可用端口。
 
 ## 环境变量
 
@@ -104,7 +104,7 @@ pnpm dev
 
 ```bash
 PORT=4000
-CORS_ORIGIN=http://localhost:5173,http://localhost:5174
+CORS_ORIGIN=http://localhost:5174
 JWT_SECRET=replace-with-a-long-random-secret
 
 DATABASE_URL="mysql://scenego:password@localhost:3306/scenego"

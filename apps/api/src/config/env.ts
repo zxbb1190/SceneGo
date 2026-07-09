@@ -34,7 +34,7 @@ const optionalPositiveIntEnvSchema = z.preprocess((value) => {
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().int().positive().default(4000),
-  CORS_ORIGIN: z.string().default("http://localhost:5173,http://localhost:5174"),
+  CORS_ORIGIN: z.string().default("http://localhost:5174"),
   DATABASE_URL: z.string().default("mysql://scenego:password@localhost:3306/scenego"),
   JWT_SECRET: z.string().default("change-me-in-local-env"),
   OPENAI_COMPATIBLE_BASE_URL: z.string().optional(),

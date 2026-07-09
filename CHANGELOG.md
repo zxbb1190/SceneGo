@@ -14,6 +14,7 @@ SceneGo public verification release.
 - One-click add-all action for AI-returned vocabulary.
 - Minimal frontend test for the text-study core flow.
 - README status, screenshot/demo placeholders, and local verification command order.
+- Web dev server now defaults to `http://localhost:5174`.
 
 ### Changed
 
