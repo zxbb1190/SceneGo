@@ -1,0 +1,39 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  github-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create or update GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          notes_file=".github/release-notes/${TAG_NAME}.md"
+          if [ ! -f "${notes_file}" ]; then
+            notes_file="CHANGELOG.md"
+          fi
+
+          if gh release view "${TAG_NAME}" >/dev/null 2>&1; then
+            gh release edit "${TAG_NAME}" \
+              --title "SceneGo ${TAG_NAME}" \
+              --notes-file "${notes_file}" \
+              --latest
+          else
+            gh release create "${TAG_NAME}" \
+              --title "SceneGo ${TAG_NAME}" \
+              --notes-file "${notes_file}" \
+              --latest
+          fi
