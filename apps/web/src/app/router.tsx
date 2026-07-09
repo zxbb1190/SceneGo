@@ -14,7 +14,7 @@ import { useAuthStore } from "../stores/authStore.js";
 export function AppRouter() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/projects" replace />} />
+      <Route path="/" element={<Navigate to="/text-study" replace />} />
       <Route path="/login" element={<LoginPage />} />
       <Route
         path="/projects"

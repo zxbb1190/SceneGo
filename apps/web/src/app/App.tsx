@@ -5,8 +5,8 @@ import { useLocalMediaStore } from "../stores/localMediaStore.js";
 import { AppRouter } from "./router.js";
 
 const navItems = [
-  { to: "/projects", label: "项目" },
   { to: "/text-study", label: "文本学习" },
+  { to: "/projects", label: "项目" },
   { to: "/study-history", label: "学习历史" },
   { to: "/sentences", label: "句子本" },
   { to: "/words", label: "生词本" }
@@ -28,7 +28,7 @@ export function App() {
     <div className="min-h-screen bg-panel text-ink">
       <header className="border-b border-line bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <NavLink to="/projects" className="text-lg font-semibold">
+          <NavLink to="/text-study" className="text-lg font-semibold">
             SceneGo
           </NavLink>
           <nav className="flex items-center gap-2">

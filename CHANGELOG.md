@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.2.1 - 2026-07-09
+
+SceneGo public verification release.
+
+### Added
+
+- MIT License.
+- GitHub Actions CI for install, build, and test.
+- Text-study examples for quick input.
+- Result focus after text analysis completes.
+- One-click favorite action for the current text analysis result.
+- One-click add-all action for AI-returned vocabulary.
+- Minimal frontend test for the text-study core flow.
+- README status, screenshot/demo placeholders, and local verification command order.
+
+### Changed
+
+- Login and root navigation now default to `/text-study`.
+- Package versions bumped to `0.2.1`.
+
 ## v0.1.0 - 2026-07-09
 
 SceneGo first open-source release.

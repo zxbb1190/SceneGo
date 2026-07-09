@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AnalyzeTextApiResponse, TextVocabularyAnalysis } from "@scenego/shared";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { listStudyItems, updateStudyItem, updateStudyItemNote, addStudyItemVocabulary } from "../api/studyItems.js";
 import { analyzeText } from "../api/textStudy.js";
@@ -11,6 +11,7 @@ import { useAuthStore } from "../stores/authStore.js";
 export function TextStudyPage() {
   const token = useAuthStore((state) => state.accessToken);
   const queryClient = useQueryClient();
+  const resultRegionRef = useRef<HTMLDivElement>(null);
   const [text, setText] = useState("");
   const [sourceNote, setSourceNote] = useState("");
   const [tagInput, setTagInput] = useState("");
@@ -80,6 +81,25 @@ export function TextStudyPage() {
       void queryClient.invalidateQueries({ queryKey: ["study-items"] });
     }
   });
+  const batchVocabularyMutation = useMutation({
+    mutationFn: async (vocabularyItems: TextVocabularyAnalysis[]) => {
+      await Promise.all(
+        vocabularyItems.map((vocabulary) =>
+          addStudyItemVocabulary(token ?? "", result?.item.id ?? "", {
+            word: vocabulary.word,
+            meaning: vocabulary.meaning,
+            sourceText: result?.item.textOriginal
+          })
+        )
+      );
+    },
+    onMutate: () => setAddingVocabularyKey(ADD_ALL_VOCABULARY_KEY),
+    onSettled: () => setAddingVocabularyKey(undefined),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["vocabulary"] });
+      void queryClient.invalidateQueries({ queryKey: ["study-items"] });
+    }
+  });
 
   useEffect(() => {
     if (!result) {
@@ -89,8 +109,20 @@ export function TextStudyPage() {
     setNote(result.item.note ?? "");
   }, [result?.item.id]);
 
+  useEffect(() => {
+    if (!result?.item.id) {
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      resultRegionRef.current?.focus({ preventScroll: true });
+      resultRegionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, [result?.item.id]);
+
   const analysisError = getErrorMessage(analyzeMutation.error);
   const canAnalyze = Boolean(text.trim()) && !analyzeMutation.isPending;
+  const canAddAllVocabulary = Boolean(result?.analysis.vocabulary.length) && !batchVocabularyMutation.isPending;
 
   return (
     <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
@@ -107,11 +139,24 @@ export function TextStudyPage() {
           </div>
           <textarea
             className="mt-4 min-h-48 w-full rounded border border-line bg-white p-3 text-sm outline-none focus:border-accent"
+            aria-label="文本学习内容"
             maxLength={4000}
             placeholder="I'm not gonna lie, that was pretty impressive."
             value={text}
             onChange={(event) => setText(event.target.value)}
           />
+          <div className="mt-3 flex flex-wrap gap-2">
+            {exampleTexts.map((example) => (
+              <button
+                key={example.label}
+                className="rounded border border-line bg-white px-3 py-2 text-sm text-slate-700 hover:border-accent"
+                type="button"
+                onClick={() => setText(example.text)}
+              >
+                {example.label}
+              </button>
+            ))}
+          </div>
           <div className="mt-3 grid gap-3 md:grid-cols-2">
             <input
               className="rounded border border-line px-3 py-2 text-sm"
@@ -154,17 +199,53 @@ export function TextStudyPage() {
           {analysisError ? <p className="mt-3 rounded bg-red-50 px-3 py-2 text-sm text-red-700">{analysisError}</p> : null}
         </div>
 
-        <TextAnalysisCard
-          analysis={result?.analysis}
-          addingVocabularyKey={addingVocabularyKey}
-          onAddVocabulary={(vocabulary) => {
-            const index = result?.analysis.vocabulary.indexOf(vocabulary) ?? 0;
-            vocabularyMutation.mutate({
-              vocabulary,
-              key: getVocabularyKey(vocabulary, index)
-            });
-          }}
-        />
+        <div
+          ref={resultRegionRef}
+          tabIndex={-1}
+          aria-label="AI 分析结果区"
+          className="outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        >
+          {result ? (
+            <div className="mb-3 flex flex-wrap items-center gap-2 rounded border border-line bg-white p-3">
+              <button
+                className={[
+                  "rounded border px-3 py-2 text-sm disabled:opacity-50",
+                  result.item.isFavorite ? "border-accent bg-accent text-white" : "border-line text-slate-700"
+                ].join(" ")}
+                type="button"
+                disabled={updateMutation.isPending}
+                onClick={() => updateMutation.mutate({ isFavorite: !result.item.isFavorite })}
+              >
+                {result.item.isFavorite ? "取消收藏当前内容" : "收藏当前内容"}
+              </button>
+              <button
+                className="rounded border border-line px-3 py-2 text-sm text-slate-700 disabled:opacity-50"
+                type="button"
+                disabled={!canAddAllVocabulary}
+                onClick={() => batchVocabularyMutation.mutate(result.analysis.vocabulary)}
+              >
+                {batchVocabularyMutation.isPending ? "加入中..." : "全部词汇加入生词本"}
+              </button>
+              <Link
+                className="rounded border border-line px-3 py-2 text-sm text-slate-700"
+                to={`/study-items/${result.item.id}`}
+              >
+                查看详情
+              </Link>
+            </div>
+          ) : null}
+          <TextAnalysisCard
+            analysis={result?.analysis}
+            addingVocabularyKey={addingVocabularyKey}
+            onAddVocabulary={(vocabulary) => {
+              const index = result?.analysis.vocabulary.indexOf(vocabulary) ?? 0;
+              vocabularyMutation.mutate({
+                vocabulary,
+                key: getVocabularyKey(vocabulary, index)
+              });
+            }}
+          />
+        </div>
       </div>
 
       <aside className="space-y-4">
@@ -182,7 +263,7 @@ export function TextStudyPage() {
                   disabled={updateMutation.isPending}
                   onClick={() => updateMutation.mutate({ isFavorite: !result.item.isFavorite })}
                 >
-                  {result.item.isFavorite ? "已收藏" : "收藏"}
+                  {result.item.isFavorite ? "已收藏" : "收藏当前内容"}
                 </button>
                 <Link className="rounded border border-line px-3 py-2 text-sm text-slate-700" to={`/study-items/${result.item.id}`}>
                   查看详情
@@ -246,6 +327,23 @@ const itemTypeLabels = {
   paragraph: "段落",
   mixed: "混合"
 } as const;
+
+const ADD_ALL_VOCABULARY_KEY = "__all__";
+
+const exampleTexts = [
+  {
+    label: "口语表达",
+    text: "I'm not gonna lie, that was pretty impressive."
+  },
+  {
+    label: "工作场景",
+    text: "Could you walk me through the main trade-offs before we make a decision?"
+  },
+  {
+    label: "影视台词",
+    text: "Sometimes the right path is not the easiest one, but it is still worth taking."
+  }
+] as const;
 
 function parseTags(value: string): string[] {
   return value

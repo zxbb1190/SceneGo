@@ -6,6 +6,16 @@ SceneGo is an AI-assisted language learning workspace for user-provided learning
 
 It is not a video content platform. SceneGo helps learners study from local videos, user-provided subtitles, external companion links, and manually entered text. It provides playback, subtitle sync, structured AI sentence/text analysis, learning history, sentence favorites, notes, and vocabulary review.
 
+## Current Status
+
+Current public verifiable release: `v0.2.1`.
+
+- Chinese README is the primary document.
+- Text study is the default entry after login.
+- Text study supports example snippets, result focus after analysis, one-click favorite, and one-click add-all AI vocabulary.
+- GitHub Actions CI runs `pnpm install --frozen-lockfile`, `pnpm build`, and `pnpm test`.
+- The project uses the MIT License.
+
 ## What It Does
 
 - Local video learning with user-selected video files and user-provided SRT/VTT subtitles
@@ -48,6 +58,21 @@ apps/api              Express API and Prisma schema
 packages/shared       Shared domain and AI JSON types
 packages/subtitles    Subtitle parser and timeline matcher
 scripts               Local smoke-test helpers
+```
+
+## Screenshots and Demo
+
+No public demo is provided yet. Start the app locally and open the main text-study entry:
+
+```text
+http://localhost:5173/text-study
+```
+
+Screenshot placeholders:
+
+```text
+docs/screenshots/text-study.png
+docs/screenshots/sentence-book.png
 ```
 
 ## Quick Start
@@ -210,6 +235,24 @@ Run tests:
 pnpm test
 ```
 
+## Local Verification Order
+
+Recommended pre-commit or pre-release checks:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm build
+pnpm test
+```
+
+To verify the database-backed API flow:
+
+```bash
+pnpm docker:mysql:up
+pnpm db:deploy
+DATABASE_URL="mysql://scenego:password@localhost:3306/scenego" pnpm smoke:api
+```
+
 ## Deployment
 
 One simple production deployment shape:
@@ -293,6 +336,6 @@ Use `GET /health/db` to check whether the API can reach MySQL. If the database i
 ## Open Source Notes
 
 - `.env`, API keys, local logs, `docs/`, and `AGENTS.md` are ignored by git.
-- Add a `LICENSE` file before publishing publicly.
+- This project is released under the MIT License.
 - Review the README and screenshots before creating the GitHub repository.
 - Keep provider keys in GitHub Actions secrets or deployment platform secrets.

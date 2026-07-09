@@ -21,7 +21,7 @@ export function LoginPage() {
 
   useEffect(() => {
     if (accessToken) {
-      navigate("/projects", { replace: true });
+      navigate("/text-study", { replace: true });
     }
   }, [accessToken, navigate]);
 
@@ -37,7 +37,7 @@ export function LoginPage() {
       clearAllProjectVideos();
       queryClient.clear();
       setSession(session);
-      navigate("/projects", { replace: true });
+      navigate("/text-study", { replace: true });
     }
   });
 
