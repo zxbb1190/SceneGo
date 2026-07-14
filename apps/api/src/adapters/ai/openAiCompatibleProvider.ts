@@ -1,12 +1,16 @@
 import type {
   AiSentenceAnalysisRequest,
   AiSentenceAnalysisResult,
+  AiQuizGenerationRequest,
+  AiQuizGenerationResult,
   AiTextAnalysisRequest,
   AiTextAnalysisResult
 } from "@scenego/shared";
 import {
+  quizQuestionJsonSchema,
   sentenceAnalysisJsonSchema,
   textAnalysisJsonSchema,
+  type QuizQuestionJsonSchema,
   type SentenceAnalysisJsonSchema,
   type TextAnalysisJsonSchema
 } from "./analysisSchema.js";
@@ -35,6 +39,9 @@ const SENTENCE_ANALYSIS_SYSTEM_PROMPT =
 
 const TEXT_ANALYSIS_SYSTEM_PROMPT =
   'Return compact valid JSON only. Shape: {"originalText":"","normalizedText":"","language":"","itemType":"word|phrase|sentence|paragraph|mixed","translation":"","summary":"","chunks":[{"text":"","meaning":"","note":""}],"vocabulary":[{"word":"","lemma":"","partOfSpeech":"","meaning":"","example":"","note":""}],"grammar":[{"title":"","explanation":"","examples":[""]}],"naturalUsage":[""],"similarExpressions":[""],"examples":[""],"memoryTips":[""]}. Use Simplified Chinese for meanings. Limits: chunks<=8, vocabulary<=12, grammar<=6, naturalUsage<=6, similarExpressions<=6, examples<=6, memoryTips<=6. Keep each explanation short. No markdown.';
+
+const QUIZ_GENERATION_SYSTEM_PROMPT =
+  'Return compact valid JSON only. Shape: {"questionType":"multiple_choice|fill_blank|short_answer","prompt":"","choices":[""],"answer":"","explanation":""}. Generate one practical language-learning exercise from the supplied source. Prefer multiple_choice with exactly 4 choices when possible. Use Simplified Chinese for explanations. No markdown.';
 
 export class OpenAiCompatibleProvider implements AiProvider {
   private readonly baseUrl: string;
@@ -142,6 +149,42 @@ export class OpenAiCompatibleProvider implements AiProvider {
     };
   }
 
+  async generateQuiz(request: AiQuizGenerationRequest): Promise<AiQuizGenerationResult> {
+    const completion = await this.createChatCompletion([
+      {
+        role: "system",
+        content: QUIZ_GENERATION_SYSTEM_PROMPT
+      },
+      {
+        role: "user",
+        content: JSON.stringify({
+          sourceType: request.sourceType,
+          language: request.language,
+          text: request.text,
+          meaning: request.meaning,
+          context: request.context
+        })
+      }
+    ]);
+    const content = completion.choices?.[0]?.message?.content;
+
+    if (!content) {
+      throw new Error("AI provider returned an empty response");
+    }
+
+    const quiz = parseProviderStructuredResponse(content, parseQuizJson);
+
+    return {
+      modelName: completion.model ?? this.model,
+      usage: {
+        inputTokens: completion.usage?.prompt_tokens,
+        outputTokens: completion.usage?.completion_tokens,
+        totalTokens: completion.usage?.total_tokens
+      },
+      quiz
+    };
+  }
+
   private async createChatCompletion(
     messages: Array<{ role: "system" | "user"; content: string }>
   ): Promise<ChatCompletionResponse> {
@@ -200,6 +243,12 @@ export function parseTextAnalysisJson(content: string): TextAnalysisJsonSchema {
   const parsed = parseJsonContent(content);
 
   return textAnalysisJsonSchema.parse(parsed);
+}
+
+export function parseQuizJson(content: string): QuizQuestionJsonSchema {
+  const parsed = parseJsonContent(content);
+
+  return quizQuestionJsonSchema.parse(parsed);
 }
 
 function parseProviderStructuredResponse<T>(content: string, parser: (content: string) => T): T {

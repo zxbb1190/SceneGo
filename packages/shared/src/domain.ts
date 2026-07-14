@@ -21,6 +21,10 @@ export type StudySourceType = "manual_input" | "video_subtitle" | "external_manu
 
 export type StudyItemMasteryStatus = "new" | "learning" | "mastered";
 
+export type ReviewTargetType = "study_item" | "vocabulary_item";
+
+export type ReviewAttemptResult = "known" | "fuzzy" | "unknown";
+
 export interface User {
   id: string;
   email: string;
@@ -289,4 +293,111 @@ export interface UpdateStudyItemInput {
 
 export interface UpdateStudyItemNoteInput {
   note: string;
+}
+
+export interface QuizItem {
+  id: string;
+  userId: string;
+  reviewTaskId?: string;
+  studyItemId?: string;
+  vocabularyItemId?: string;
+  questionType: import("./ai.js").QuizQuestionType;
+  questionText: string;
+  choices: string[];
+  answer: string;
+  explanation?: string;
+  quiz: import("./ai.js").QuizQuestionJson;
+  modelName?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReviewTaskTarget {
+  studyItem?: StudyItemSummary;
+  vocabularyItem?: VocabularyItemSummary;
+}
+
+export interface ReviewTaskSummary {
+  id: string;
+  userId: string;
+  targetType: ReviewTargetType;
+  studyItemId?: string;
+  vocabularyItemId?: string;
+  nextReviewAt: string;
+  lastReviewedAt?: string;
+  intervalDays: number;
+  attemptCount: number;
+  target: ReviewTaskTarget;
+  latestQuiz?: QuizItem;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReviewAttemptSummary {
+  id: string;
+  userId: string;
+  reviewTaskId: string;
+  studyItemId?: string;
+  vocabularyItemId?: string;
+  quizItemId?: string;
+  result: ReviewAttemptResult;
+  userAnswer?: string;
+  isCorrect?: boolean;
+  targetType: ReviewTargetType;
+  target: ReviewTaskTarget;
+  quiz?: QuizItem;
+  createdAt: string;
+}
+
+export interface ReviewTodayResponse {
+  tasks: ReviewTaskSummary[];
+  summary: {
+    dueCount: number;
+    vocabularyCount: number;
+    studyItemCount: number;
+  };
+}
+
+export interface SubmitReviewAttemptInput {
+  result: ReviewAttemptResult;
+  quizItemId?: string;
+  userAnswer?: string;
+  isCorrect?: boolean;
+}
+
+export interface SubmitReviewAttemptResponse {
+  task: ReviewTaskSummary;
+  attempt: ReviewAttemptSummary;
+}
+
+export interface GenerateQuizInput {
+  sourceType: ReviewTargetType;
+  sourceId: string;
+}
+
+export interface GenerateQuizResponse {
+  task: ReviewTaskSummary;
+  quiz: QuizItem;
+}
+
+export interface AnswerQuizInput {
+  userAnswer: string;
+  result?: ReviewAttemptResult;
+}
+
+export interface MistakesResponse {
+  attempts: ReviewAttemptSummary[];
+}
+
+export interface LearningReport {
+  todayStudyItems: number;
+  todayVocabularyItems: number;
+  todayReviewAttempts: number;
+  todayKnownAttempts: number;
+  todayFuzzyAttempts: number;
+  todayUnknownAttempts: number;
+  dueToday: number;
+  masteredStudyItems: number;
+  masteredVocabularyItems: number;
+  mistakeAttempts: number;
 }

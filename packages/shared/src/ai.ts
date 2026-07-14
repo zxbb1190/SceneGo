@@ -61,6 +61,16 @@ export interface TextAnalysisJson {
   memoryTips: string[];
 }
 
+export type QuizQuestionType = "multiple_choice" | "fill_blank" | "short_answer";
+
+export interface QuizQuestionJson {
+  questionType: QuizQuestionType;
+  prompt: string;
+  choices?: string[];
+  answer: string;
+  explanation: string;
+}
+
 export interface AiSentenceAnalysisRequest {
   projectId: string;
   subtitleLineId?: string;
@@ -108,6 +118,26 @@ export interface AiTextAnalysisResult {
     totalTokens?: number;
   };
   analysis: TextAnalysisJson;
+}
+
+export interface AiQuizGenerationRequest {
+  userId: string;
+  sourceType: "study_item" | "vocabulary_item";
+  sourceId: string;
+  language: string;
+  text: string;
+  meaning?: string;
+  context?: string;
+}
+
+export interface AiQuizGenerationResult {
+  modelName?: string;
+  usage?: {
+    inputTokens?: number;
+    outputTokens?: number;
+    totalTokens?: number;
+  };
+  quiz: QuizQuestionJson;
 }
 
 export interface AnalyzeSentenceApiResponse {

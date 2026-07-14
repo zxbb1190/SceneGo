@@ -7,6 +7,7 @@ import { errorMiddleware } from "./http/errorMiddleware.js";
 import { createAnalysisRouter } from "./routes/analysisRoutes.js";
 import { createAuthRouter } from "./routes/authRoutes.js";
 import { createProjectRouter } from "./routes/projectRoutes.js";
+import { createReviewRouter } from "./routes/reviewRoutes.js";
 import { V0_1_PROJECT_SOURCE_TYPES } from "./routes/projectSourceValidation.js";
 import { createSentenceRouter } from "./routes/sentenceRoutes.js";
 import { createStudyItemRouter } from "./routes/studyItemRoutes.js";
@@ -42,7 +43,7 @@ export function createServer(): Express {
   app.get("/api/v1", (_request: Request, response: Response) => {
     response.json({
       name: "SceneGo API",
-      version: "0.2.0",
+      version: "0.2.2",
       sourceTypes: V0_1_PROJECT_SOURCE_TYPES
     });
   });
@@ -55,6 +56,7 @@ export function createServer(): Express {
   app.use("/api/v1/study-items", createStudyItemRouter());
   app.use("/api/v1/sentences", createSentenceRouter());
   app.use("/api/v1/vocabulary", createVocabularyRouter());
+  app.use("/api/v1/review", createReviewRouter());
   app.use(errorMiddleware);
 
   return app;

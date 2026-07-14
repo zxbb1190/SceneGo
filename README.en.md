@@ -8,11 +8,12 @@ It is not a video content platform. SceneGo helps learners study from local vide
 
 ## Current Status
 
-Current public verifiable release: `v0.2.1`.
+Current public verifiable release: `v0.2.2`.
 
 - Chinese README is the primary document.
 - Text study is the default entry after login.
 - Text study supports example snippets, result focus after analysis, one-click favorite, and one-click add-all AI vocabulary.
+- Daily review, deterministic review scheduling, structured AI quizzes, mistakes, and learning reports are available.
 - GitHub Actions CI runs `pnpm install --frozen-lockfile`, `pnpm build`, and `pnpm test`.
 - The project uses the MIT License.
 
@@ -26,6 +27,9 @@ Current public verifiable release: `v0.2.1`.
 - Learning history with filters, detail pages, notes, favorites, and deletion
 - Sentence book that includes both video/subtitle favorites and text-study sentence favorites
 - Vocabulary book with source context, mastery status, and deletion
+- Daily review for due words and study items with known, fuzzy, and unknown outcomes
+- Structured AI quizzes generated from study items or vocabulary items
+- Mistake history and learning reports for daily study, review, mastery, and mistakes
 - External-link companion mode using iframe/open-in-new-tab plus manual sentence input
 - OpenAI-compatible AI provider adapter with structured JSON validation and caching
 
@@ -136,7 +140,7 @@ Optional AI variables:
 
 ```bash
 AI_MAX_TOKENS=4096
-AI_REQUEST_TIMEOUT_MS=60000
+AI_REQUEST_TIMEOUT_MS=180000
 AI_RESPONSE_FORMAT=json_object
 AI_ENABLE_THINKING=false
 ```
@@ -162,7 +166,7 @@ OPENAI_COMPATIBLE_BASE_URL=https://api.siliconflow.cn/v1
 OPENAI_COMPATIBLE_API_KEY=your-siliconflow-key
 AI_MODEL=deepseek-ai/DeepSeek-V4-Flash
 AI_MAX_TOKENS=4096
-AI_REQUEST_TIMEOUT_MS=60000
+AI_REQUEST_TIMEOUT_MS=180000
 AI_ENABLE_THINKING=false
 ```
 

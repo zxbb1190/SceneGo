@@ -4,6 +4,7 @@ import { ZodError } from "zod";
 import {
   OpenAiCompatibleProvider,
   parseAnalysisJson,
+  parseQuizJson,
   parseTextAnalysisJson
 } from "../src/adapters/ai/openAiCompatibleProvider.js";
 import { AiProviderInvalidResponseError } from "../src/adapters/ai/types.js";
@@ -64,6 +65,14 @@ const validTextAnalysisJson = {
   memoryTips: ["impress + ive means able to impress people."]
 };
 
+const validQuizJson = {
+  questionType: "multiple_choice",
+  prompt: "Which meaning best matches 'impressive'?",
+  choices: ["令人印象深刻的", "普通的", "迟到的", "安静的"],
+  answer: "令人印象深刻的",
+  explanation: "impressive means something leaves a strong positive impression."
+};
+
 describe("parseAnalysisJson", () => {
   it("accepts valid structured sentence analysis JSON", () => {
     const parsed = parseAnalysisJson(JSON.stringify(validAnalysisJson));
@@ -99,6 +108,16 @@ describe("parseTextAnalysisJson", () => {
 
     assert.equal(parsed.itemType, "word");
     assert.equal(parsed.vocabulary[0]?.word, "impressive");
+  });
+});
+
+describe("parseQuizJson", () => {
+  it("accepts valid structured quiz JSON", () => {
+    const parsed = parseQuizJson(JSON.stringify(validQuizJson));
+
+    assert.equal(parsed.questionType, "multiple_choice");
+    assert.equal(parsed.choices?.length, 4);
+    assert.equal(parsed.answer, "令人印象深刻的");
   });
 });
 
@@ -267,6 +286,62 @@ describe("OpenAiCompatibleProvider", () => {
           }),
         AiProviderInvalidResponseError
       );
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  it("generates structured quiz items", async () => {
+    const originalFetch = globalThis.fetch;
+    let requestBody: Record<string, unknown> = {};
+
+    globalThis.fetch = async (_input, init) => {
+      requestBody = JSON.parse(String(init?.body)) as Record<string, unknown>;
+
+      return new Response(
+        JSON.stringify({
+          model: "test-model",
+          choices: [
+            {
+              message: {
+                content: JSON.stringify(validQuizJson)
+              }
+            }
+          ],
+          usage: {
+            prompt_tokens: 8,
+            completion_tokens: 16,
+            total_tokens: 24
+          }
+        }),
+        {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      );
+    };
+
+    try {
+      const provider = new OpenAiCompatibleProvider({
+        baseUrl: "https://example.test/v1",
+        apiKey: "test-key",
+        model: "test-model"
+      });
+
+      const result = await provider.generateQuiz({
+        userId: "user-1",
+        sourceType: "vocabulary_item",
+        sourceId: "vocabulary-1",
+        language: "en",
+        text: "impressive",
+        meaning: "令人印象深刻的"
+      });
+
+      assert.equal(result.quiz.questionType, "multiple_choice");
+      assert.equal(result.usage?.totalTokens, 24);
+      assert.match(JSON.stringify(requestBody.messages), /vocabulary_item/);
     } finally {
       globalThis.fetch = originalFetch;
     }

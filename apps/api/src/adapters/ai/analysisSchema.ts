@@ -64,3 +64,13 @@ export const textAnalysisJsonSchema = z.object({
 });
 
 export type TextAnalysisJsonSchema = z.infer<typeof textAnalysisJsonSchema>;
+
+export const quizQuestionJsonSchema = z.object({
+  questionType: z.enum(["multiple_choice", "fill_blank", "short_answer"]),
+  prompt: z.string().min(1),
+  choices: z.array(z.string()).min(2).max(6).optional(),
+  answer: z.string().min(1),
+  explanation: z.string().min(1)
+});
+
+export type QuizQuestionJsonSchema = z.infer<typeof quizQuestionJsonSchema>;

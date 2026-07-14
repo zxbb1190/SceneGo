@@ -53,6 +53,23 @@ enum StudyItemMasteryStatus {
   MASTERED @map("mastered")
 }
 
+enum ReviewTargetType {
+  STUDY_ITEM      @map("study_item")
+  VOCABULARY_ITEM @map("vocabulary_item")
+}
+
+enum ReviewAttemptResult {
+  KNOWN   @map("known")
+  FUZZY   @map("fuzzy")
+  UNKNOWN @map("unknown")
+}
+
+enum QuizQuestionType {
+  MULTIPLE_CHOICE @map("multiple_choice")
+  FILL_BLANK      @map("fill_blank")
+  SHORT_ANSWER    @map("short_answer")
+}
+
 model User {
   id               String                 @id @default(uuid()) @db.VarChar(36)
   email            String                 @unique @db.VarChar(255)
@@ -64,6 +81,9 @@ model User {
   aiUsageLogs      AiUsageLog[]
   studyItems       StudyItem[]
   userNotes        UserNote[]
+  reviewTasks      ReviewTask[]
+  reviewAttempts   ReviewAttempt[]
+  quizItems        QuizItem[]
   createdAt        DateTime               @default(now()) @map("created_at")
   updatedAt        DateTime               @updatedAt @map("updated_at")
 
@@ -175,6 +195,9 @@ model VocabularyItem {
   sourceType     StudySourceType?        @map("source_type")
   note           String?                 @db.Text
   masteryStatus  VocabularyMasteryStatus @default(NEW) @map("mastery_status")
+  reviewTasks    ReviewTask[]
+  reviewAttempts ReviewAttempt[]
+  quizItems      QuizItem[]
   createdAt      DateTime                @default(now()) @map("created_at")
   updatedAt      DateTime                @updatedAt @map("updated_at")
 
@@ -234,6 +257,9 @@ model StudyItem {
   vocabularyItems    VocabularyItem[]
   notes              UserNote[]
   aiUsageLogs        AiUsageLog[]
+  reviewTasks        ReviewTask[]
+  reviewAttempts     ReviewAttempt[]
+  quizItems          QuizItem[]
   createdAt          DateTime               @default(now()) @map("created_at")
   updatedAt          DateTime               @updatedAt @map("updated_at")
 
@@ -279,4 +305,83 @@ model UserNote {
   @@index([projectId])
   @@index([subtitleLineId])
   @@map("user_notes")
+}
+
+model ReviewTask {
+  id               String          @id @default(uuid()) @db.VarChar(36)
+  userId           String          @map("user_id") @db.VarChar(36)
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetType       ReviewTargetType @map("target_type")
+  studyItemId      String?         @map("study_item_id") @db.VarChar(36)
+  studyItem        StudyItem?      @relation(fields: [studyItemId], references: [id], onDelete: Cascade)
+  vocabularyItemId String?         @map("vocabulary_item_id") @db.VarChar(36)
+  vocabularyItem   VocabularyItem? @relation(fields: [vocabularyItemId], references: [id], onDelete: Cascade)
+  nextReviewAt     DateTime        @map("next_review_at")
+  lastReviewedAt   DateTime?       @map("last_reviewed_at")
+  intervalDays     Int             @default(0) @map("interval_days")
+  attemptCount     Int             @default(0) @map("attempt_count")
+  attempts         ReviewAttempt[]
+  quizItems        QuizItem[]
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
+
+  @@unique([userId, studyItemId])
+  @@unique([userId, vocabularyItemId])
+  @@index([userId, nextReviewAt])
+  @@index([studyItemId])
+  @@index([vocabularyItemId])
+  @@map("review_tasks")
+}
+
+model ReviewAttempt {
+  id               String              @id @default(uuid()) @db.VarChar(36)
+  userId           String              @map("user_id") @db.VarChar(36)
+  user             User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reviewTaskId     String              @map("review_task_id") @db.VarChar(36)
+  reviewTask       ReviewTask          @relation(fields: [reviewTaskId], references: [id], onDelete: Cascade)
+  studyItemId      String?             @map("study_item_id") @db.VarChar(36)
+  studyItem        StudyItem?          @relation(fields: [studyItemId], references: [id], onDelete: Cascade)
+  vocabularyItemId String?             @map("vocabulary_item_id") @db.VarChar(36)
+  vocabularyItem   VocabularyItem?     @relation(fields: [vocabularyItemId], references: [id], onDelete: Cascade)
+  quizItemId       String?             @map("quiz_item_id") @db.VarChar(36)
+  quizItem         QuizItem?           @relation(fields: [quizItemId], references: [id], onDelete: SetNull)
+  result           ReviewAttemptResult
+  userAnswer       String?             @map("user_answer") @db.Text
+  isCorrect        Boolean?            @map("is_correct")
+  createdAt        DateTime            @default(now()) @map("created_at")
+
+  @@index([userId, createdAt])
+  @@index([reviewTaskId])
+  @@index([studyItemId])
+  @@index([vocabularyItemId])
+  @@index([quizItemId])
+  @@map("review_attempts")
+}
+
+model QuizItem {
+  id               String           @id @default(uuid()) @db.VarChar(36)
+  userId           String           @map("user_id") @db.VarChar(36)
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reviewTaskId     String?          @map("review_task_id") @db.VarChar(36)
+  reviewTask       ReviewTask?      @relation(fields: [reviewTaskId], references: [id], onDelete: SetNull)
+  studyItemId      String?          @map("study_item_id") @db.VarChar(36)
+  studyItem        StudyItem?       @relation(fields: [studyItemId], references: [id], onDelete: Cascade)
+  vocabularyItemId String?          @map("vocabulary_item_id") @db.VarChar(36)
+  vocabularyItem   VocabularyItem?  @relation(fields: [vocabularyItemId], references: [id], onDelete: Cascade)
+  questionType     QuizQuestionType @default(MULTIPLE_CHOICE) @map("question_type")
+  questionText     String           @map("question_text") @db.Text
+  choices          Json?
+  answer           String           @db.Text
+  explanation      String?          @db.Text
+  quizJson         Json             @map("quiz_json")
+  modelName        String?          @map("model_name") @db.VarChar(100)
+  attempts         ReviewAttempt[]
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+
+  @@index([userId, createdAt])
+  @@index([reviewTaskId])
+  @@index([studyItemId])
+  @@index([vocabularyItemId])
+  @@map("quiz_items")
 }

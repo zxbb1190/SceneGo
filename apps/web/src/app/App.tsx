@@ -6,10 +6,13 @@ import { AppRouter } from "./router.js";
 
 const navItems = [
   { to: "/text-study", label: "文本学习" },
+  { to: "/review/today", label: "今日复习" },
   { to: "/projects", label: "项目" },
   { to: "/study-history", label: "学习历史" },
   { to: "/sentences", label: "句子本" },
-  { to: "/words", label: "生词本" }
+  { to: "/words", label: "生词本" },
+  { to: "/mistakes", label: "错题本" },
+  { to: "/report", label: "报告" }
 ];
 
 export function App() {
@@ -27,11 +30,11 @@ export function App() {
   return (
     <div className="min-h-screen bg-panel text-ink">
       <header className="border-b border-line bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-6 py-4">
           <NavLink to="/text-study" className="text-lg font-semibold">
             SceneGo
           </NavLink>
-          <nav className="flex items-center gap-2">
+          <nav className="flex flex-wrap items-center gap-2">
             {navItems.map((item) => (
               <NavLink
                 key={item.to}

@@ -1,9 +1,12 @@
 import type { PropsWithChildren } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { LoginPage } from "../pages/LoginPage.js";
+import { MistakesPage } from "../pages/MistakesPage.js";
 import { PlayerStudyPage } from "../pages/PlayerStudyPage.js";
 import { ProjectCreatePage } from "../pages/ProjectCreatePage.js";
 import { ProjectListPage } from "../pages/ProjectListPage.js";
+import { ReportPage } from "../pages/ReportPage.js";
+import { ReviewTodayPage } from "../pages/ReviewTodayPage.js";
 import { SentenceBookPage } from "../pages/SentenceBookPage.js";
 import { StudyHistoryPage } from "../pages/StudyHistoryPage.js";
 import { StudyItemDetailPage } from "../pages/StudyItemDetailPage.js";
@@ -45,6 +48,30 @@ export function AppRouter() {
         element={
           <RequireAuth>
             <TextStudyPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/review/today"
+        element={
+          <RequireAuth>
+            <ReviewTodayPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/mistakes"
+        element={
+          <RequireAuth>
+            <MistakesPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/report"
+        element={
+          <RequireAuth>
+            <ReportPage />
           </RequireAuth>
         }
       />

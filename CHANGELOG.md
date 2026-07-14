@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.2.2 - 2026-07-14
+
+SceneGo review and practice release.
+
+### Added
+
+- Review task scheduling for study items and vocabulary items.
+- Review attempt history with known, fuzzy, and unknown outcomes.
+- Structured AI quiz generation and persisted quiz answers.
+- Daily review page at `/review/today`.
+- Mistakes page at `/mistakes`.
+- Learning report page at `/report`.
+- Deterministic review interval and quiz answer scoring tests.
+
+### Changed
+
+- AI provider timeout defaults to 180 seconds for slower OpenAI-compatible models.
+- Package and API versions bumped to `0.2.2`.
+
 ## v0.2.1 - 2026-07-09
 
 SceneGo public verification release.

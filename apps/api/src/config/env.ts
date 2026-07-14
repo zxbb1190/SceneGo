@@ -43,7 +43,7 @@ const envSchema = z.object({
   AI_ENABLE_THINKING: optionalBooleanEnvSchema,
   AI_RESPONSE_FORMAT: z.enum(["json_object"]).optional(),
   AI_MAX_TOKENS: optionalPositiveIntEnvSchema,
-  AI_REQUEST_TIMEOUT_MS: optionalPositiveIntEnvSchema.default(60_000)
+  AI_REQUEST_TIMEOUT_MS: optionalPositiveIntEnvSchema.default(180_000)
 });
 
 export const env = envSchema.parse(process.env);

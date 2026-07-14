@@ -2,12 +2,15 @@ import type {
   AiTextAnalysisRequest,
   AiTextAnalysisResult,
   AiSentenceAnalysisRequest,
-  AiSentenceAnalysisResult
+  AiSentenceAnalysisResult,
+  AiQuizGenerationRequest,
+  AiQuizGenerationResult
 } from "@scenego/shared";
 
 export interface AiProvider {
   analyzeSentence(request: AiSentenceAnalysisRequest): Promise<AiSentenceAnalysisResult>;
   analyzeText(request: AiTextAnalysisRequest): Promise<AiTextAnalysisResult>;
+  generateQuiz(request: AiQuizGenerationRequest): Promise<AiQuizGenerationResult>;
 }
 
 export interface OpenAiCompatibleProviderOptions {
