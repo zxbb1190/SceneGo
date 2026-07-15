@@ -120,6 +120,32 @@ export interface AiTextAnalysisResult {
   analysis: TextAnalysisJson;
 }
 
+export type ConversationMessageType = "learning_candidate" | "follow_up" | "unrelated";
+
+export interface ConversationTurn {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface AiConversationClassificationRequest {
+  userId: string;
+  language: string;
+  message: string;
+  history: ConversationTurn[];
+}
+
+export interface AiConversationClassificationResult {
+  messageType: ConversationMessageType;
+  reply: string;
+  tags: string[];
+  modelName?: string;
+  usage?: {
+    inputTokens?: number;
+    outputTokens?: number;
+    totalTokens?: number;
+  };
+}
+
 export interface AiQuizGenerationRequest {
   userId: string;
   sourceType: "study_item" | "vocabulary_item";

@@ -84,6 +84,7 @@ model User {
   reviewTasks      ReviewTask[]
   reviewAttempts   ReviewAttempt[]
   quizItems        QuizItem[]
+  conversations    Conversation[]
   createdAt        DateTime               @default(now()) @map("created_at")
   updatedAt        DateTime               @updatedAt @map("updated_at")
 
@@ -260,6 +261,7 @@ model StudyItem {
   reviewTasks        ReviewTask[]
   reviewAttempts     ReviewAttempt[]
   quizItems          QuizItem[]
+  conversationMessages ConversationMessage[]
   createdAt          DateTime               @default(now()) @map("created_at")
   updatedAt          DateTime               @updatedAt @map("updated_at")
 
@@ -271,6 +273,42 @@ model StudyItem {
   @@index([projectId])
   @@index([subtitleLineId])
   @@map("study_items")
+}
+
+model Conversation {
+  id        String               @id @default(uuid()) @db.VarChar(36)
+  userId    String               @map("user_id") @db.VarChar(36)
+  user      User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String               @db.VarChar(255)
+  messages  ConversationMessage[]
+  createdAt DateTime             @default(now()) @map("created_at")
+  updatedAt DateTime             @updatedAt @map("updated_at")
+
+  @@index([userId, updatedAt])
+  @@map("conversations")
+}
+
+model ConversationMessage {
+  id             String        @id @default(uuid()) @db.VarChar(36)
+  conversationId String        @map("conversation_id") @db.VarChar(36)
+  conversation   Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  studyItemId    String?       @map("study_item_id") @db.VarChar(36)
+  studyItem      StudyItem?    @relation(fields: [studyItemId], references: [id], onDelete: SetNull)
+  role           String        @db.VarChar(20)
+  content        String        @db.Text
+  messageIndex   Int           @map("message_index")
+  reasoning      String?       @db.Text
+  classificationReasoning String? @map("classification_reasoning") @db.Text
+  analysisReasoning       String? @map("analysis_reasoning") @db.Text
+  messageType    String?       @map("message_type") @db.VarChar(40)
+  shouldSave     Boolean       @default(false) @map("should_save")
+  tags           Json?
+  createdAt      DateTime      @default(now()) @map("created_at")
+
+  @@index([conversationId, createdAt])
+  @@unique([conversationId, messageIndex])
+  @@index([studyItemId])
+  @@map("conversation_messages")
 }
 
 model StudyItemAnalysis {

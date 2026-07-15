@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { LearningProjectSummary } from "@scenego/shared";
+import { ArrowUpRight, Clapperboard, Edit3, Trash2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { deleteProject, listProjects, updateProject } from "../api/projects.js";
@@ -57,17 +58,29 @@ export function ProjectListPage() {
   }
 
   return (
-    <section className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">学习项目</h1>
-        <Link className="rounded bg-ink px-4 py-2 text-sm font-semibold text-white" to="/projects/new">
-          新建项目
-        </Link>
+    <section className="projects-page">
+      <div className="projects-summary-band">
+        <div>
+          <p>Active projects</p>
+          <strong>{projectsQuery.data?.projects.length ?? 0}</strong>
+        </div>
+        <div>
+          <p>Learned sentences</p>
+          <strong>{sumProjectMetric(projectsQuery.data?.projects, "learnedSentenceCount")}</strong>
+        </div>
+        <div>
+          <p>Saved sentences</p>
+          <strong>{sumProjectMetric(projectsQuery.data?.projects, "favoriteSentenceCount")}</strong>
+        </div>
+        <div>
+          <p>Vocabulary</p>
+          <strong>{sumProjectMetric(projectsQuery.data?.projects, "vocabularyCount")}</strong>
+        </div>
       </div>
       {projectsQuery.isLoading ? (
-        <div className="rounded border border-line bg-white p-8 text-center text-sm text-slate-500">加载中...</div>
+        <div className="scene-page-status">正在载入项目...</div>
       ) : projectsQuery.data?.projects.length ? (
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div className="projects-list">
           {projectsQuery.data.projects.map((project) => (
             <ProjectCard
               key={project.id}
@@ -85,8 +98,10 @@ export function ProjectListPage() {
           ))}
         </div>
       ) : (
-        <div className="rounded border border-dashed border-line bg-white p-8 text-center text-sm text-slate-500">
-          暂无项目
+        <div className="scene-page-status">
+          <Clapperboard aria-hidden="true" />
+          <p>暂无项目</p>
+          <Link className="scene-primary-command" to="/projects/new">创建第一个项目</Link>
         </div>
       )}
     </section>
@@ -125,25 +140,29 @@ function ProjectCard({
   }
 
   return (
-    <article className="rounded border border-line bg-white p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div>
+    <article className="project-row">
+      <div className="project-row-visual"><Clapperboard aria-hidden="true" /></div>
+      <div className="project-row-main">
+        <div className="project-row-heading">
+          <div>
           <h2 className="font-semibold">{project.title}</h2>
-          <p className="mt-1 text-sm text-slate-600">
+          <p>
             {project.language} · {formatSourceType(project.sourceType)}
           </p>
         </div>
         <button
-          className="rounded border border-line px-2 py-1 text-xs text-slate-600 disabled:opacity-50"
+          className="project-icon-button project-delete-button"
           type="button"
+          title="删除项目"
+          aria-label={`删除项目 ${project.title}`}
           disabled={isDeleting}
           onClick={onDelete}
         >
-          删除
+          <Trash2 aria-hidden="true" />
         </button>
       </div>
       {isEditing ? (
-        <form className="mt-4 grid gap-3" onSubmit={handleSubmit}>
+        <form className="project-edit-form" onSubmit={handleSubmit}>
           <label className="block text-sm font-medium">
             项目名称
             <input
@@ -195,26 +214,27 @@ function ProjectCard({
           </div>
         </form>
       ) : null}
-      <dl className="mt-4 grid grid-cols-3 gap-2 text-sm">
+      <dl className="project-metrics">
         <Metric label="字幕" value={project.subtitleLineCount} />
         <Metric label="已学" value={project.learnedSentenceCount} />
         <Metric label="收藏" value={project.favoriteSentenceCount} />
       </dl>
-      <div className="mt-4 space-y-2">
-        <div className="flex items-center justify-between gap-3 text-xs text-slate-500">
+      <div className="project-progress">
+        <div>
           <span>{formatProgress(project.lastPosition, project.duration)}</span>
           <span>{formatDateTime(project.updatedAt)}</span>
         </div>
-        <div className="h-2 overflow-hidden rounded bg-panel">
-          <div className="h-full rounded bg-accent" style={{ width: `${progressPercent}%` }} />
+        <div className="project-progress-track">
+          <div style={{ width: `${progressPercent}%` }} />
         </div>
       </div>
-      <div className="mt-4 flex justify-end gap-2">
-        <button className="rounded border border-line px-3 py-2 text-sm text-slate-700" type="button" onClick={onEdit}>
-          编辑
+      </div>
+      <div className="project-row-actions">
+        <button className="project-secondary-command" type="button" onClick={onEdit}>
+          <Edit3 aria-hidden="true" /> 编辑
         </button>
-        <Link className="rounded bg-accent px-3 py-2 text-sm font-semibold text-white" to={`/projects/${project.id}/study`}>
-          继续学习
+        <Link className="project-primary-command" to={`/projects/${project.id}/study`}>
+          继续学习 <ArrowUpRight aria-hidden="true" />
         </Link>
       </div>
     </article>
@@ -223,11 +243,18 @@ function ProjectCard({
 
 function Metric({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded bg-panel p-2">
-      <dt className="text-xs text-slate-500">{label}</dt>
-      <dd className="mt-1 font-semibold">{value}</dd>
+    <div>
+      <dt>{label}</dt>
+      <dd>{value}</dd>
     </div>
   );
+}
+
+function sumProjectMetric(
+  projects: LearningProjectSummary[] | undefined,
+  key: "favoriteSentenceCount" | "learnedSentenceCount" | "vocabularyCount"
+): number {
+  return projects?.reduce((total, project) => total + project[key], 0) ?? 0;
 }
 
 function formatSourceType(sourceType: string) {

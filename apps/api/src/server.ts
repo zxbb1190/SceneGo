@@ -43,7 +43,7 @@ export function createServer(): Express {
   app.get("/api/v1", (_request: Request, response: Response) => {
     response.json({
       name: "SceneGo API",
-      version: "0.2.2",
+      version: "0.3.0",
       sourceTypes: V0_1_PROJECT_SOURCE_TYPES
     });
   });

@@ -1,5 +1,33 @@
 # Changelog
 
+## v0.3.0 - 2026-07-15
+
+SceneGo conversational learning workspace release.
+
+### Added
+
+- Persistent multi-turn conversations with ordered message history.
+- AI routing for new learning expressions, follow-up questions, and unrelated chat.
+- Automatic AI-generated learning tags and selective study-library insertion.
+- Real SSE streaming for reasoning, replies, and structured learning analysis.
+- Background conversation jobs that continue across page and route changes.
+- Unified learning library for sentences, vocabulary, and mistakes.
+- Redesigned dashboard, application shell, login experience, and mobile navigation.
+- Light and dark themes with a larger, more readable typography scale.
+
+### Changed
+
+- Reworked the primary navigation around Chat, Projects, Library, and Dashboard.
+- Split classification reasoning from learning-analysis reasoning in persisted conversations.
+- Added task-specific AI thinking and output budgets for faster OpenAI-compatible responses.
+- Reduced repetitive AI analysis content while preserving translation, breakdown, vocabulary, grammar, usage, examples, and memory tips.
+- Package and API versions bumped to `0.3.0`.
+
+### Upgrade Notes
+
+- Run `pnpm db:deploy` to apply the new conversation migrations.
+- Review `AI_THINKING_BUDGET`, `AI_CLASSIFICATION_MAX_TOKENS`, and `AI_ANALYSIS_MAX_TOKENS` in `.env.example`.
+
 ## v0.2.2 - 2026-07-14
 
 SceneGo review and practice release.

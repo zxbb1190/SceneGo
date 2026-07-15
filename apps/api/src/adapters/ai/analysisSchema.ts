@@ -65,6 +65,14 @@ export const textAnalysisJsonSchema = z.object({
 
 export type TextAnalysisJsonSchema = z.infer<typeof textAnalysisJsonSchema>;
 
+export const conversationClassificationJsonSchema = z.object({
+  messageType: z.enum(["learning_candidate", "follow_up", "unrelated"]),
+  reply: z.string().min(1).max(2_000),
+  tags: z.array(z.string().trim().min(1).max(32)).max(8)
+});
+
+export type ConversationClassificationJsonSchema = z.infer<typeof conversationClassificationJsonSchema>;
+
 export const quizQuestionJsonSchema = z.object({
   questionType: z.enum(["multiple_choice", "fill_blank", "short_answer"]),
   prompt: z.string().min(1),

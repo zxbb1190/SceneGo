@@ -1,47 +1,47 @@
 import type { TextAnalysisJson, TextVocabularyAnalysis } from "@scenego/shared";
+import { BookPlus } from "lucide-react";
 
 export interface TextAnalysisCardProps {
   analysis?: TextAnalysisJson;
   onAddVocabulary?: (vocabulary: TextVocabularyAnalysis) => void;
   addingVocabularyKey?: string;
+  streaming?: boolean;
 }
 
 export function TextAnalysisCard({
   addingVocabularyKey,
   analysis,
-  onAddVocabulary
+  onAddVocabulary,
+  streaming = false
 }: TextAnalysisCardProps) {
   if (!analysis) {
     return (
-      <div className="rounded border border-dashed border-line bg-white p-4 text-sm text-slate-500">
-        AI 分析结果
-      </div>
+      <div className="text-analysis-empty">AI 分析结果</div>
     );
   }
 
   return (
-    <article className="space-y-5 rounded border border-line bg-white p-4">
-      <header>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded bg-panel px-2 py-1 text-xs font-semibold text-slate-600">
-            {itemTypeLabels[analysis.itemType]}
-          </span>
-          <span className="text-xs text-slate-500">{analysis.language}</span>
+    <article className={streaming ? "text-analysis is-streaming" : "text-analysis"}>
+      <header className="text-analysis-header">
+        <div className="text-analysis-kicker">
+          <span>{itemTypeLabels[analysis.itemType]}</span>
+          <span>{analysis.language}</span>
+          {streaming ? <i className="text-analysis-stream-indicator" aria-label="分析生成中" /> : null}
         </div>
-        <h2 className="mt-3 text-lg font-semibold">{analysis.originalText}</h2>
-        <p className="mt-2 text-sm text-slate-700">{analysis.translation}</p>
-        <p className="mt-2 text-sm text-slate-600">{analysis.summary}</p>
+        <h2>{analysis.originalText}</h2>
+        {analysis.translation ? <p className="text-analysis-translation">{analysis.translation}</p> : null}
+        {analysis.summary ? <p className="text-analysis-summary">{analysis.summary}</p> : null}
       </header>
 
       {analysis.chunks.length ? (
-        <section>
-          <h3 className="text-sm font-semibold">拆解</h3>
-          <div className="mt-2 grid gap-2">
+        <section className="text-analysis-section">
+          <h3>拆解</h3>
+          <div className="text-analysis-chunks">
             {analysis.chunks.map((chunk, index) => (
-              <div key={`${chunk.text}-${index}`} className="rounded bg-panel p-3 text-sm">
-                <p className="font-medium">{chunk.text}</p>
-                <p className="mt-1 text-slate-600">{chunk.meaning}</p>
-                {chunk.note ? <p className="mt-1 text-xs text-slate-500">{chunk.note}</p> : null}
+              <div key={`${chunk.text}-${index}`}>
+                <p>{chunk.text}</p>
+                <span>{chunk.meaning}</span>
+                {chunk.note ? <small>{chunk.note}</small> : null}
               </div>
             ))}
           </div>
@@ -49,38 +49,29 @@ export function TextAnalysisCard({
       ) : null}
 
       {analysis.vocabulary.length ? (
-        <section>
-          <h3 className="text-sm font-semibold">词汇</h3>
-          <div className="mt-2 grid gap-2">
+        <section className="text-analysis-section">
+          <h3>词汇</h3>
+          <div className="text-analysis-vocabulary">
             {analysis.vocabulary.map((vocabulary, index) => {
               const vocabularyKey = getVocabularyKey(vocabulary, index);
 
               return (
-                <div
-                  key={vocabularyKey}
-                  className="grid gap-3 rounded bg-panel p-3 text-sm md:grid-cols-[minmax(0,1fr)_120px]"
-                >
+                <div key={vocabularyKey}>
                   <div>
-                    <p className="font-medium">
+                    <p>
                       {vocabulary.word}
-                      {vocabulary.partOfSpeech ? (
-                        <span className="ml-2 text-xs font-normal text-slate-500">
-                          {vocabulary.partOfSpeech}
-                        </span>
-                      ) : null}
+                      {vocabulary.partOfSpeech ? <small>{vocabulary.partOfSpeech}</small> : null}
                     </p>
-                    <p className="mt-1 text-slate-600">{vocabulary.meaning}</p>
-                    {vocabulary.example ? (
-                      <p className="mt-1 text-xs text-slate-500">{vocabulary.example}</p>
-                    ) : null}
+                    <span>{vocabulary.meaning}</span>
+                    {vocabulary.example ? <small>{vocabulary.example}</small> : null}
                   </div>
                   {onAddVocabulary ? (
                     <button
-                      className="self-start rounded border border-line bg-white px-3 py-2 text-sm text-slate-700 disabled:opacity-50"
                       type="button"
                       disabled={addingVocabularyKey === vocabularyKey}
                       onClick={() => onAddVocabulary(vocabulary)}
                     >
+                      <BookPlus aria-hidden="true" />
                       加入生词本
                     </button>
                   ) : null}
@@ -92,16 +83,14 @@ export function TextAnalysisCard({
       ) : null}
 
       {analysis.grammar.length ? (
-        <section>
-          <h3 className="text-sm font-semibold">语法</h3>
-          <div className="mt-2 space-y-2">
+        <section className="text-analysis-section">
+          <h3>语法</h3>
+          <div className="text-analysis-grammar">
             {analysis.grammar.map((point) => (
-              <div key={point.title} className="text-sm">
-                <p className="font-medium">{point.title}</p>
-                <p className="mt-1 text-slate-600">{point.explanation}</p>
-                {point.examples?.length ? (
-                  <p className="mt-1 text-xs text-slate-500">{point.examples.join(" / ")}</p>
-                ) : null}
+              <div key={point.title}>
+                <p>{point.title}</p>
+                <span>{point.explanation}</span>
+                {point.examples?.length ? <small>{point.examples.join(" / ")}</small> : null}
               </div>
             ))}
           </div>
@@ -134,9 +123,9 @@ function TextListSection({ items, title }: { items: string[]; title: string }) {
   }
 
   return (
-    <section>
-      <h3 className="text-sm font-semibold">{title}</h3>
-      <ul className="mt-2 space-y-1 text-sm text-slate-600">
+    <section className="text-analysis-section text-analysis-list">
+      <h3>{title}</h3>
+      <ul>
         {items.map((item, index) => (
           <li key={`${title}-${index}`}>{item}</li>
         ))}

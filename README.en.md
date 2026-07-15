@@ -8,11 +8,14 @@ It is not a video content platform. SceneGo helps learners study from local vide
 
 ## Current Status
 
-Current public verifiable release: `v0.2.2`.
+Current public verifiable release: `v0.3.0`.
 
 - Chinese README is the primary document.
-- Text study is the default entry after login.
-- Text study supports example snippets, result focus after analysis, one-click favorite, and one-click add-all AI vocabulary.
+- AI chat is the default entry after login, with multi-turn language learning in general and project contexts.
+- The AI distinguishes new learning content from follow-up and unrelated messages, saves only new expressions, and assigns tags automatically.
+- Reasoning, replies, and structured learning analysis stream progressively and continue when users switch routes.
+- The learning library unifies sentences, vocabulary, and mistakes, while the dashboard summarizes learning activity.
+- Dark/light themes and responsive desktop/mobile layouts are included.
 - Daily review, deterministic review scheduling, structured AI quizzes, mistakes, and learning reports are available.
 - GitHub Actions CI runs `pnpm install --frozen-lockfile`, `pnpm build`, and `pnpm test`.
 - The project uses the MIT License.
@@ -117,8 +120,11 @@ OPENAI_COMPATIBLE_BASE_URL=
 OPENAI_COMPATIBLE_API_KEY=
 AI_MODEL=
 AI_ENABLE_THINKING=
+AI_THINKING_BUDGET=
 AI_RESPONSE_FORMAT=
 AI_MAX_TOKENS=
+AI_CLASSIFICATION_MAX_TOKENS=512
+AI_ANALYSIS_MAX_TOKENS=2048
 AI_REQUEST_TIMEOUT_MS=
 ```
 
@@ -140,9 +146,12 @@ Optional AI variables:
 
 ```bash
 AI_MAX_TOKENS=4096
+AI_CLASSIFICATION_MAX_TOKENS=512
+AI_ANALYSIS_MAX_TOKENS=2048
 AI_REQUEST_TIMEOUT_MS=180000
 AI_RESPONSE_FORMAT=json_object
-AI_ENABLE_THINKING=false
+AI_ENABLE_THINKING=true
+AI_THINKING_BUDGET=1024
 ```
 
 Compatibility notes:
@@ -150,6 +159,9 @@ Compatibility notes:
 - `OPENAI_COMPATIBLE_BASE_URL` should be the API root ending in `/v1`.
 - `AI_RESPONSE_FORMAT=json_object` sends `response_format: { "type": "json_object" }`. Leave it empty if your provider does not support this field.
 - `AI_ENABLE_THINKING=false` sends the provider extension `enable_thinking: false`. Leave it empty unless your provider supports that option.
+- `AI_THINKING_BUDGET` limits reasoning length on providers that support the extension when `AI_ENABLE_THINKING=true`; `1024` is a practical starting point for language analysis.
+- Conversation classification is a lightweight routing task. Once `AI_ENABLE_THINKING` is configured, SceneGo disables thinking for classification and applies `AI_CLASSIFICATION_MAX_TOKENS`.
+- `AI_ANALYSIS_MAX_TOKENS` limits only the learning-analysis response. Setting it too low can truncate structured JSON.
 - The app still prompts for JSON and validates JSON even when `AI_RESPONSE_FORMAT` is not enabled.
 - If the provider returns malformed or truncated JSON, the API returns `502 AI_PROVIDER_INVALID_RESPONSE` instead of a generic 500.
 
@@ -166,8 +178,11 @@ OPENAI_COMPATIBLE_BASE_URL=https://api.siliconflow.cn/v1
 OPENAI_COMPATIBLE_API_KEY=your-siliconflow-key
 AI_MODEL=deepseek-ai/DeepSeek-V4-Flash
 AI_MAX_TOKENS=4096
+AI_CLASSIFICATION_MAX_TOKENS=512
+AI_ANALYSIS_MAX_TOKENS=2048
 AI_REQUEST_TIMEOUT_MS=180000
-AI_ENABLE_THINKING=false
+AI_ENABLE_THINKING=true
+AI_THINKING_BUDGET=1024
 ```
 
 If you use a model/provider that supports OpenAI JSON mode, you may also add:

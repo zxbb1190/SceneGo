@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import type { StudyItemType, StudySourceType, TextAnalysisJson } from "@scenego/shared";
 import { textAnalysisJsonSchema } from "../adapters/ai/analysisSchema.js";
 import { createAiProvider } from "../adapters/ai/providerFactory.js";
+import type { AiStreamCallbacks } from "../adapters/ai/types.js";
 import { prisma } from "../db/prisma.js";
 import { ApiError } from "../http/apiError.js";
 import {
@@ -27,7 +28,8 @@ export interface AnalyzeTextForUserResult {
 }
 
 export async function analyzeTextForUser(
-  input: AnalyzeTextForUserInput
+  input: AnalyzeTextForUserInput,
+  callbacks?: AiStreamCallbacks
 ): Promise<AnalyzeTextForUserResult> {
   const normalizedText = normalizeStudyText(input.text);
   if (!normalizedText) {
@@ -125,7 +127,7 @@ export async function analyzeTextForUser(
     normalizedText,
     sourceNote: input.sourceNote,
     tags
-  });
+  }, callbacks);
 
   await prisma.studyItemAnalysis.upsert({
     where: { studyItemId: studyItem.id },

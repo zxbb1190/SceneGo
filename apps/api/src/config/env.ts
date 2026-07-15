@@ -41,8 +41,11 @@ const envSchema = z.object({
   OPENAI_COMPATIBLE_API_KEY: z.string().optional(),
   AI_MODEL: z.string().optional(),
   AI_ENABLE_THINKING: optionalBooleanEnvSchema,
+  AI_THINKING_BUDGET: optionalPositiveIntEnvSchema,
   AI_RESPONSE_FORMAT: z.enum(["json_object"]).optional(),
   AI_MAX_TOKENS: optionalPositiveIntEnvSchema,
+  AI_CLASSIFICATION_MAX_TOKENS: optionalPositiveIntEnvSchema.default(512),
+  AI_ANALYSIS_MAX_TOKENS: optionalPositiveIntEnvSchema.default(2_048),
   AI_REQUEST_TIMEOUT_MS: optionalPositiveIntEnvSchema.default(180_000)
 });
 

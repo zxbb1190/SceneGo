@@ -275,6 +275,63 @@ export interface AnalyzeTextApiResponse {
   modelName?: string;
 }
 
+export interface AnalyzeConversationInput {
+  message: string;
+  language?: string;
+  history?: import("./ai.js").ConversationTurn[];
+  conversationId?: string;
+}
+
+export interface AnalyzeConversationApiResponse {
+  messageType: import("./ai.js").ConversationMessageType;
+  conversationId: string;
+  shouldSave: boolean;
+  reply: string;
+  reasoning?: string;
+  classificationReasoning?: string;
+  analysisReasoning?: string;
+  tags: string[];
+  item?: StudyItemDetail;
+  analysis?: import("./ai.js").TextAnalysisJson;
+  cached?: boolean;
+  modelName?: string;
+}
+
+export type ConversationStreamEvent =
+  | { type: "conversation"; conversationId: string }
+  | { type: "reasoning_delta"; phase: "classification" | "analysis"; delta: string }
+  | { type: "content_delta"; delta: string }
+  | { type: "analysis_delta"; analysis: import("./ai.js").TextAnalysisJson }
+  | { type: "result"; data: AnalyzeConversationApiResponse }
+  | { type: "error"; message: string; code?: string };
+
+export interface ConversationSummary {
+  id: string;
+  title: string;
+  messageCount: number;
+  lastMessage?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ConversationMessageSummary {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  reasoning?: string;
+  classificationReasoning?: string;
+  analysisReasoning?: string;
+  messageType?: import("./ai.js").ConversationMessageType;
+  shouldSave: boolean;
+  tags: string[];
+  studyItem?: StudyItemDetail;
+  createdAt: string;
+}
+
+export interface ConversationDetail extends ConversationSummary {
+  messages: ConversationMessageSummary[];
+}
+
 export interface StudyItemListFilters {
   keyword?: string;
   itemType?: StudyItemType;

@@ -4,6 +4,7 @@ import { ZodError } from "zod";
 import {
   OpenAiCompatibleProvider,
   parseAnalysisJson,
+  parseConversationClassificationJson,
   parseQuizJson,
   parseTextAnalysisJson
 } from "../src/adapters/ai/openAiCompatibleProvider.js";
@@ -73,6 +74,12 @@ const validQuizJson = {
   explanation: "impressive means something leaves a strong positive impression."
 };
 
+const validConversationClassificationJson = {
+  messageType: "learning_candidate",
+  reply: "这是一条值得学习的表达。",
+  tags: ["casual", "translation"]
+};
+
 describe("parseAnalysisJson", () => {
   it("accepts valid structured sentence analysis JSON", () => {
     const parsed = parseAnalysisJson(JSON.stringify(validAnalysisJson));
@@ -118,6 +125,15 @@ describe("parseQuizJson", () => {
     assert.equal(parsed.questionType, "multiple_choice");
     assert.equal(parsed.choices?.length, 4);
     assert.equal(parsed.answer, "令人印象深刻的");
+  });
+});
+
+describe("parseConversationClassificationJson", () => {
+  it("accepts a structured routing decision", () => {
+    const parsed = parseConversationClassificationJson(JSON.stringify(validConversationClassificationJson));
+
+    assert.equal(parsed.messageType, "learning_candidate");
+    assert.deepEqual(parsed.tags, ["casual", "translation"]);
   });
 });
 
@@ -220,8 +236,10 @@ describe("OpenAiCompatibleProvider", () => {
         baseUrl: "https://example.test/v1",
         apiKey: "test-key",
         model: "test-model",
-        enableThinking: false,
-        maxTokens: 2048
+        enableThinking: true,
+        thinkingBudget: 1024,
+        maxTokens: 4096,
+        analysisMaxTokens: 2048
       });
 
       const result = await provider.analyzeText({
@@ -233,7 +251,8 @@ describe("OpenAiCompatibleProvider", () => {
         normalizedText: "impressive"
       });
 
-      assert.equal(requestBody.enable_thinking, false);
+      assert.equal(requestBody.enable_thinking, true);
+      assert.equal(requestBody.thinking_budget, 1024);
       assert.equal(requestBody.max_tokens, 2048);
       assert.equal(result.analysis.originalText, "Impressive");
       assert.equal(result.analysis.normalizedText, "impressive");
@@ -342,6 +361,119 @@ describe("OpenAiCompatibleProvider", () => {
       assert.equal(result.quiz.questionType, "multiple_choice");
       assert.equal(result.usage?.totalTokens, 24);
       assert.match(JSON.stringify(requestBody.messages), /vocabulary_item/);
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  it("classifies the latest conversation message with history", async () => {
+    const originalFetch = globalThis.fetch;
+    let requestBody: Record<string, unknown> = {};
+
+    globalThis.fetch = async (_input, init) => {
+      requestBody = JSON.parse(String(init?.body)) as Record<string, unknown>;
+
+      return new Response(
+        JSON.stringify({
+          model: "test-model",
+          choices: [
+            {
+              message: {
+                content: JSON.stringify(validConversationClassificationJson)
+              }
+            }
+          ]
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    };
+
+    try {
+      const provider = new OpenAiCompatibleProvider({
+        baseUrl: "https://example.test/v1",
+        apiKey: "test-key",
+        model: "test-model",
+        enableThinking: true,
+        thinkingBudget: 1024,
+        maxTokens: 4096,
+        classificationMaxTokens: 512
+      });
+
+      const result = await provider.classifyConversation({
+        userId: "user-1",
+        language: "en",
+        message: "What does pretty mean here?",
+        history: [{ role: "user", content: "That was pretty impressive." }]
+      });
+
+      assert.equal(result.messageType, "learning_candidate");
+      assert.match(JSON.stringify(requestBody.messages), /That was pretty impressive/);
+      assert.equal(requestBody.enable_thinking, false);
+      assert.equal(requestBody.thinking_budget, undefined);
+      assert.equal(requestBody.max_tokens, 512);
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  it("streams reasoning and structured content from an OpenAI-compatible SSE response", async () => {
+    const originalFetch = globalThis.fetch;
+    const reasoningDeltas: string[] = [];
+    const contentDeltas: string[] = [];
+    const stream = [
+      JSON.stringify({
+        model: "test-model",
+        choices: [{ delta: { reasoning_content: "先判断消息类型。" } }]
+      }),
+      JSON.stringify({
+        model: "test-model",
+        choices: [{ delta: { reasoning_content: "再返回学习标签。" } }]
+      }),
+      JSON.stringify({
+        model: "test-model",
+        choices: [{ delta: { content: '{"messageType":"learning_candidate","reply":"' } }]
+      }),
+      JSON.stringify({
+        model: "test-model",
+        choices: [{ delta: { content: '值得学习。","tags":["casual"]}' } }]
+      }),
+      "[DONE]"
+    ]
+      .map((entry) => `data: ${entry}\n\n`)
+      .join("");
+
+    globalThis.fetch = async () =>
+      new Response(stream, {
+        status: 200,
+        headers: { "Content-Type": "text/event-stream" }
+      });
+
+    try {
+      const provider = new OpenAiCompatibleProvider({
+        baseUrl: "https://example.test/v1",
+        apiKey: "test-key",
+        model: "test-model",
+        enableThinking: true
+      });
+
+      const result = await provider.classifyConversation(
+        {
+          userId: "user-1",
+          language: "en",
+          message: "That was impressive.",
+          history: []
+        },
+        {
+          onReasoningDelta: (delta) => reasoningDeltas.push(delta),
+          onContentDelta: (delta) => contentDeltas.push(delta)
+        }
+      );
+
+      assert.deepEqual(reasoningDeltas, ["先判断消息类型。", "再返回学习标签。"]);
+      assert.deepEqual(contentDeltas, ['{"messageType":"learning_candidate","reply":"', '值得学习。","tags":["casual"]}']);
+      assert.equal(result.messageType, "learning_candidate");
+      assert.equal(result.reply, "值得学习。");
+      assert.deepEqual(result.tags, ["casual"]);
     } finally {
       globalThis.fetch = originalFetch;
     }
