@@ -2,6 +2,8 @@
 
 [中文文档](README.md)
 
+[Official website](https://zxbb1190.github.io/SceneGo/) · [GitHub Releases](https://github.com/zxbb1190/SceneGo/releases)
+
 SceneGo is an AI-assisted language learning workspace for user-provided learning scenes.
 
 It is not a video content platform. SceneGo helps learners study from local videos, user-provided subtitles, external companion links, and manually entered text. It provides playback, subtitle sync, structured AI sentence/text analysis, learning history, sentence favorites, notes, and vocabulary review.
@@ -19,6 +21,7 @@ Current version: `v0.3.1`.
 - Dark/light themes and responsive desktop/mobile layouts are included.
 - Daily review, deterministic review scheduling, structured AI quizzes, mistakes, and learning reports are available.
 - GitHub Actions CI runs `pnpm install --frozen-lockfile`, `pnpm build`, and `pnpm test`.
+- The promotional website is automatically deployed to GitHub Pages with Chinese/English content and responsive layouts.
 - The project uses the MIT License.
 
 ## What It Does
@@ -66,22 +69,26 @@ apps/web              React frontend
 apps/api              Express API and Prisma schema
 packages/shared       Shared domain and AI JSON types
 packages/subtitles    Subtitle parser and timeline matcher
+website               SceneGo promotional site and GitHub Pages build
 scripts               Local smoke-test helpers
 ```
 
 ## Screenshots and Demo
 
-No public demo is provided yet. Start the app locally and open the main text-study entry:
+Visit the [SceneGo official website](https://zxbb1190.github.io/SceneGo/) for the product overview, real interface screenshots, deployment path, and explicit product boundaries.
+
+Website screenshots are stored in:
 
 ```text
-http://localhost:5174/text-study
+website/public/images/hero-chat.png
+website/public/images/conversation-analysis.png
+website/public/images/voice-input.png
 ```
 
-Screenshot placeholders:
+After starting the complete application locally, open:
 
 ```text
-docs/screenshots/text-study.png
-docs/screenshots/sentence-book.png
+http://localhost:5174/
 ```
 
 ## Quick Start

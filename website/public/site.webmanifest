@@ -1,0 +1,15 @@
+{
+  "name": "SceneGo",
+  "short_name": "SceneGo",
+  "start_url": "/SceneGo/",
+  "display": "standalone",
+  "background_color": "#f4f6f2",
+  "theme_color": "#0c0e0d",
+  "icons": [
+    {
+      "src": "/SceneGo/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

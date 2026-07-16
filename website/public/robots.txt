@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://zxbb1190.github.io/SceneGo/sitemap.xml
