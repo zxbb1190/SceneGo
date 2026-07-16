@@ -297,6 +297,11 @@ export interface AnalyzeConversationApiResponse {
   modelName?: string;
 }
 
+export interface TranscribeAudioApiResponse {
+  text: string;
+  modelName?: string;
+}
+
 export type ConversationStreamEvent =
   | { type: "conversation"; conversationId: string }
   | { type: "reasoning_delta"; phase: "classification" | "analysis"; delta: string }

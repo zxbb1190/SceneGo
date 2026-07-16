@@ -8,12 +8,13 @@ It is not a video content platform. SceneGo helps learners study from local vide
 
 ## Current Status
 
-Current public verifiable release: `v0.3.0`.
+Current version: `v0.3.1`.
 
 - Chinese README is the primary document.
 - AI chat is the default entry after login, with multi-turn language learning in general and project contexts.
 - The AI distinguishes new learning content from follow-up and unrelated messages, saves only new expressions, and assigns tags automatically.
 - Reasoning, replies, and structured learning analysis stream progressively and continue when users switch routes.
+- Chat input supports microphone, computer audio, and mixed recording, with editable transcripts before sending.
 - The learning library unifies sentences, vocabulary, and mistakes, while the dashboard summarizes learning activity.
 - Dark/light themes and responsive desktop/mobile layouts are included.
 - Daily review, deterministic review scheduling, structured AI quizzes, mistakes, and learning reports are available.
@@ -27,6 +28,7 @@ Current public verifiable release: `v0.3.0`.
 - Native video playback, previous/next sentence navigation, and replay current sentence
 - AI sentence analysis for subtitle lines and manual companion text
 - Text learning for words, phrases, sentences, paragraphs, and mixed snippets
+- Voice input from microphone, computer audio, or a mixed source, with editable transcripts before sending
 - Learning history with filters, detail pages, notes, favorites, and deletion
 - Sentence book that includes both video/subtitle favorites and text-study sentence favorites
 - Vocabulary book with source context, mastery status, and deletion
@@ -126,6 +128,13 @@ AI_MAX_TOKENS=
 AI_CLASSIFICATION_MAX_TOKENS=512
 AI_ANALYSIS_MAX_TOKENS=2048
 AI_REQUEST_TIMEOUT_MS=
+
+STT_BASE_URL=
+STT_API_KEY=
+STT_MODEL=
+STT_TRANSCRIPTION_PATH=/audio/transcriptions
+STT_REQUEST_TIMEOUT_MS=120000
+STT_MAX_AUDIO_BYTES=20971520
 ```
 
 Never commit `.env` or API keys.
@@ -190,6 +199,26 @@ If you use a model/provider that supports OpenAI JSON mode, you may also add:
 ```bash
 AI_RESPONSE_FORMAT=json_object
 ```
+
+## Voice Input Setup
+
+SceneGo uses the OpenAI-compatible `/audio/transcriptions` endpoint for speech-to-text. Speech transcription and chat may use different providers. When `STT_BASE_URL` or `STT_API_KEY` is omitted, the backend reuses `OPENAI_COMPATIBLE_BASE_URL` and `OPENAI_COMPATIBLE_API_KEY`.
+
+SiliconFlow example:
+
+```bash
+STT_MODEL=FunAudioLLM/SenseVoiceSmall
+STT_TRANSCRIPTION_PATH=/audio/transcriptions
+STT_REQUEST_TIMEOUT_MS=120000
+STT_MAX_AUDIO_BYTES=20971520
+```
+
+- Microphone mode supports selecting audio input devices visible to the browser.
+- Computer audio mode opens the browser display-sharing picker and requires explicit audio consent.
+- Mixed mode combines microphone and computer audio in the browser without playing the recording back.
+- Raw recordings are used only for the current transcription and are not persisted by SceneGo.
+- Recordings are limited to 5 minutes and 20 MB by default. Production deployments require HTTPS; localhost is exempt.
+- A web app cannot silently enumerate or capture a specific speaker. Computer-audio support depends on the browser and operating system; Chrome or Edge on Windows is recommended.
 
 ## Database
 

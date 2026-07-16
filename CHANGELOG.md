@@ -1,5 +1,29 @@
 # Changelog
 
+## v0.3.1 - 2026-07-16
+
+SceneGo voice input release.
+
+### Added
+
+- Microphone recording with selectable browser audio-input devices.
+- Computer-audio capture through the browser display-sharing picker.
+- Mixed microphone and computer-audio recording using the Web Audio API.
+- Live input-level waveform, elapsed timer, pause, resume, stop, and cancel controls.
+- Editable speech transcripts inserted into the chat composer before sending.
+- Provider-neutral OpenAI-compatible `/audio/transcriptions` adapter.
+- Independent STT provider, model, timeout, endpoint, and upload-size configuration.
+
+### Security and Privacy
+
+- Raw recordings are kept in memory only for the active transcription request and are not persisted.
+- Recording stops when the voice-input component leaves the page.
+- Computer-audio capture always requires the browser's explicit sharing permission.
+
+### Changed
+
+- Package and API versions bumped to `0.3.1`.
+
 ## v0.3.0 - 2026-07-15
 
 SceneGo conversational learning workspace release.

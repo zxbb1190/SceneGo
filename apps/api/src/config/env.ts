@@ -46,7 +46,13 @@ const envSchema = z.object({
   AI_MAX_TOKENS: optionalPositiveIntEnvSchema,
   AI_CLASSIFICATION_MAX_TOKENS: optionalPositiveIntEnvSchema.default(512),
   AI_ANALYSIS_MAX_TOKENS: optionalPositiveIntEnvSchema.default(2_048),
-  AI_REQUEST_TIMEOUT_MS: optionalPositiveIntEnvSchema.default(180_000)
+  AI_REQUEST_TIMEOUT_MS: optionalPositiveIntEnvSchema.default(180_000),
+  STT_BASE_URL: z.string().optional(),
+  STT_API_KEY: z.string().optional(),
+  STT_MODEL: z.string().optional(),
+  STT_TRANSCRIPTION_PATH: z.string().trim().min(1).default("/audio/transcriptions"),
+  STT_REQUEST_TIMEOUT_MS: optionalPositiveIntEnvSchema.default(120_000),
+  STT_MAX_AUDIO_BYTES: optionalPositiveIntEnvSchema.default(20 * 1024 * 1024)
 });
 
 export const env = envSchema.parse(process.env);

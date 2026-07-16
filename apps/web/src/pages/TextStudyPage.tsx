@@ -25,6 +25,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { getConversation, listConversations } from "../api/conversations.js";
 import { listStudyItems, updateStudyItem, updateStudyItemNote, addStudyItemVocabulary } from "../api/studyItems.js";
 import { TextAnalysisCard, getVocabularyKey } from "../components/TextStudy/TextAnalysisCard.js";
+import { VoiceInput } from "../components/VoiceInput/VoiceInput.js";
 import { useAuthStore } from "../stores/authStore.js";
 import { useConversationStreamStore, type ConversationStreamJob } from "../stores/conversationStreamStore.js";
 
@@ -539,6 +540,10 @@ export function TextStudyPage() {
             />
             <div className="chat-composer-footer">
               <div>
+                <VoiceInput
+                  token={token ?? ""}
+                  onTranscript={(transcript) => setText((current) => current.trim() ? `${current.trimEnd()} ${transcript}` : transcript)}
+                />
                 <button type="button" title="清空输入" onClick={() => setText("")}><Eraser aria-hidden="true" /></button>
               </div>
               <button

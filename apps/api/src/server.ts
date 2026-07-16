@@ -5,6 +5,7 @@ import { prisma } from "./db/prisma.js";
 import { asyncHandler } from "./http/asyncHandler.js";
 import { errorMiddleware } from "./http/errorMiddleware.js";
 import { createAnalysisRouter } from "./routes/analysisRoutes.js";
+import { createAudioRouter } from "./routes/audioRoutes.js";
 import { createAuthRouter } from "./routes/authRoutes.js";
 import { createProjectRouter } from "./routes/projectRoutes.js";
 import { createReviewRouter } from "./routes/reviewRoutes.js";
@@ -43,7 +44,7 @@ export function createServer(): Express {
   app.get("/api/v1", (_request: Request, response: Response) => {
     response.json({
       name: "SceneGo API",
-      version: "0.3.0",
+      version: "0.3.1",
       sourceTypes: V0_1_PROJECT_SOURCE_TYPES
     });
   });
@@ -51,6 +52,7 @@ export function createServer(): Express {
   app.use("/api/v1/auth", createAuthRouter());
   app.use("/api/v1/projects", createProjectRouter());
   app.use("/api/v1/analysis", createAnalysisRouter());
+  app.use("/api/v1/audio", createAudioRouter());
   app.use("/api/v1/text", createTextRouter());
   app.use("/api/text", createTextRouter());
   app.use("/api/v1/study-items", createStudyItemRouter());

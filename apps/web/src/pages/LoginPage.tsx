@@ -92,7 +92,7 @@ export function LoginPage() {
         <footer className="auth-brand-footer">
           <span>OpenAI-compatible</span>
           <span>Self-hosted</span>
-          <span>SceneGo / 0.3.0</span>
+          <span>SceneGo / 0.3.1</span>
         </footer>
       </section>
 
