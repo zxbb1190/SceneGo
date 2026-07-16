@@ -1,7 +1,5 @@
 import {
   ArrowRight,
-  AudioLines,
-  BookOpen,
   BrainCircuit,
   Check,
   ChevronRight,
@@ -14,14 +12,10 @@ import {
   Library,
   LockKeyhole,
   MessageSquareText,
-  Mic,
   MonitorPlay,
-  MoonStar,
   ServerCog,
   Sparkles,
   Subtitles,
-  Volume2,
-  X,
   type LucideIcon
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
@@ -37,16 +31,14 @@ const links = {
 
 const copy = {
   zh: {
-    nav: ["产品", "工作流", "语音输入", "部署"],
-    navIds: ["product", "workflow", "voice", "deploy"],
+    nav: ["产品", "工作流", "部署"],
+    navIds: ["product", "workflow", "deploy"],
     github: "GitHub",
     heroKicker: "OPEN SOURCE · AI LANGUAGE WORKSPACE",
     heroTitle: "SceneGo",
     heroLead: "把真实场景中的表达，变成可持续积累的语言能力。",
-    heroBody: "从多轮对话、视频字幕到电脑声音，SceneGo 帮你理解当下这一句，并把真正需要学习的内容沉淀进自己的知识库。",
     source: "查看源码",
     deploy: "本地部署",
-    version: "当前版本 v0.3.1",
     proof: ["OpenAI-compatible", "本地材料优先", "MIT License", "中文优先"],
     introKicker: "ONE WORKSPACE, EVERY SCENE",
     introTitle: "不是多一个学习工具，而是少一点场景切换。",
@@ -73,21 +65,6 @@ const copy = {
       ["外链伴学", "只做嵌入或外部打开，配合手动输入分析，不读取跨域页面。"],
       ["自由对话", "翻译、润色、表达辨析和上下文追问都在同一条会话中完成。"]
     ],
-    voiceKicker: "VOICE IN, TEXT YOU CAN EDIT",
-    voiceTitle: "听见麦克风，也听见电脑里的场景。",
-    voiceBody: "在聊天输入框中选择麦克风、电脑声音或混合录音。停止后先转写到输入框，由你确认和修改，再交给 AI 分析。",
-    voiceModes: [
-      ["麦克风", "选择浏览器可见的输入设备，适合口语和临时想法。"],
-      ["电脑声音", "通过浏览器共享选择器获取标签页、窗口或系统音频。"],
-      ["混合录音", "在浏览器内合并麦克风与电脑声音，不把录音回放到扬声器。"]
-    ],
-    privacyKicker: "YOUR MATERIALS STAY YOURS",
-    privacyTitle: "能力做得完整，边界也说得清楚。",
-    privacyBody: "SceneGo 面向用户自有或有权使用的学习材料。平台只提供学习工具，不成为内容来源。",
-    allowedTitle: "SceneGo 会做",
-    deniedTitle: "SceneGo 不会做",
-    allowed: ["处理你主动输入或导入的学习材料", "缓存结构化 AI 分析，减少重复调用", "保存你的学习进度、收藏、笔记和复习记录", "使用可替换的 OpenAI-compatible AI 与 STT 服务"],
-    denied: ["下载或抓取第三方视频与字幕", "绕过 DRM、登录、广告、会员或防盗链", "读取跨域 iframe 的 DOM 或媒体状态", "默认保存语音输入产生的原始录音"],
     deployKicker: "SELF-HOST IN MINUTES",
     deployTitle: "代码、模型和数据，都由你决定放在哪里。",
     deployBody: "React + Vite 前端、Node.js API、MySQL + Prisma。聊天和语音转写分别配置 OpenAI-compatible provider，也可以共用同一套服务凭据。",
@@ -102,16 +79,14 @@ const copy = {
     rights: "SceneGo · MIT License"
   },
   en: {
-    nav: ["Product", "Workflow", "Voice", "Deploy"],
-    navIds: ["product", "workflow", "voice", "deploy"],
+    nav: ["Product", "Workflow", "Deploy"],
+    navIds: ["product", "workflow", "deploy"],
     github: "GitHub",
     heroKicker: "OPEN SOURCE · AI LANGUAGE WORKSPACE",
     heroTitle: "SceneGo",
     heroLead: "Turn expressions from real scenes into language you can keep using.",
-    heroBody: "From multi-turn chat and video subtitles to computer audio, SceneGo helps you understand the sentence in front of you and retain only what is worth learning.",
     source: "View source",
     deploy: "Self-host",
-    version: "Current release v0.3.1",
     proof: ["OpenAI-compatible", "Local materials first", "MIT License", "Chinese-first docs"],
     introKicker: "ONE WORKSPACE, EVERY SCENE",
     introTitle: "Less context switching. More connected learning.",
@@ -138,21 +113,6 @@ const copy = {
       ["Link companion", "Embed or open externally with manual analysis. No cross-origin page access."],
       ["Open conversation", "Translation, rewriting, nuance, and contextual follow-ups in one thread."]
     ],
-    voiceKicker: "VOICE IN, TEXT YOU CAN EDIT",
-    voiceTitle: "Hear the microphone and the scene playing on your computer.",
-    voiceBody: "Choose microphone, computer audio, or a mixed source in the composer. Transcripts return as editable text for confirmation before AI analysis.",
-    voiceModes: [
-      ["Microphone", "Choose a browser-visible input device for speaking and quick thoughts."],
-      ["Computer audio", "Use the browser sharing picker for tab, window, or supported system audio."],
-      ["Mixed capture", "Combine microphone and computer audio without playing the recording back."]
-    ],
-    privacyKicker: "YOUR MATERIALS STAY YOURS",
-    privacyTitle: "Clear capabilities, equally clear boundaries.",
-    privacyBody: "SceneGo is built for materials you own or have permission to use. It provides learning tools, not content sources.",
-    allowedTitle: "SceneGo does",
-    deniedTitle: "SceneGo does not",
-    allowed: ["Process learning material you explicitly provide", "Cache structured AI analysis to avoid duplicate calls", "Store progress, favorites, notes, and review history", "Use replaceable OpenAI-compatible AI and STT providers"],
-    denied: ["Download or scrape third-party video and subtitles", "Bypass DRM, login, ads, memberships, or hotlink protection", "Read cross-origin iframe DOM or media state", "Persist raw voice recordings by default"],
     deployKicker: "SELF-HOST IN MINUTES",
     deployTitle: "You choose where the code, models, and data live.",
     deployBody: "React + Vite on the frontend, Node.js API, and MySQL + Prisma. Chat and speech transcription use separate OpenAI-compatible provider settings or shared credentials.",
@@ -216,7 +176,6 @@ export function App() {
             <p className="eyebrow hero-eyebrow">{t.heroKicker}</p>
             <h1>{t.heroTitle}</h1>
             <p className="hero-lead">{t.heroLead}</p>
-            <p className="hero-body">{t.heroBody}</p>
             <div className="hero-actions">
               <a className="primary-link" href={links.github} target="_blank" rel="noreferrer">
                 <Github aria-hidden="true" />
@@ -228,10 +187,6 @@ export function App() {
                 {t.deploy}
               </a>
             </div>
-            <a className="version-link" href={links.release} target="_blank" rel="noreferrer">
-              <span>{t.version}</span>
-              <ExternalLink aria-hidden="true" />
-            </a>
           </div>
         </section>
 
@@ -303,45 +258,6 @@ export function App() {
                 <p>{body}</p>
               </article>
             ))}
-          </div>
-        </section>
-
-        <section className="voice-section" id="voice">
-          <div className="page-width voice-layout">
-            <figure className="voice-frame">
-              <img src="images/voice-input.png" alt="SceneGo microphone and computer audio input" loading="lazy" />
-            </figure>
-            <div className="section-heading voice-copy">
-              <p className="eyebrow">{t.voiceKicker}</p>
-              <h2>{t.voiceTitle}</h2>
-              <p>{t.voiceBody}</p>
-              <div className="voice-mode-list">
-                {t.voiceModes.map(([title, body], index) => (
-                  <div key={title}>
-                    <IndexedIcon icons={[Mic, Volume2, AudioLines]} index={index} />
-                    <span><strong>{title}</strong><small>{body}</small></span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="privacy-section page-width">
-          <div className="section-heading wide-heading">
-            <p className="eyebrow">{t.privacyKicker}</p>
-            <h2>{t.privacyTitle}</h2>
-            <p>{t.privacyBody}</p>
-          </div>
-          <div className="boundary-grid">
-            <section>
-              <div className="boundary-heading"><Check aria-hidden="true" /><h3>{t.allowedTitle}</h3></div>
-              <ul>{t.allowed.map((item) => <li key={item}>{item}</li>)}</ul>
-            </section>
-            <section className="boundary-denied">
-              <div className="boundary-heading"><X aria-hidden="true" /><h3>{t.deniedTitle}</h3></div>
-              <ul>{t.denied.map((item) => <li key={item}>{item}</li>)}</ul>
-            </section>
           </div>
         </section>
 
